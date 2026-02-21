@@ -9,7 +9,7 @@ export interface PaginatedResponse<T> {
 export interface ApiError {
     message: string;
     code?: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
 }
 
 export type JobType = 'Full-time' | 'Part-time' | 'Contract' | 'Freelance' | 'Internship' | string;
