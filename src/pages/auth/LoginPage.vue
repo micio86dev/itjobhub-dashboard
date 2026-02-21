@@ -134,7 +134,7 @@ const onSubmit = handleSubmit(async (values) => {
       variant: 'default',
     })
     router.push('/dashboard')
-  } catch (e) {
+  } catch {
     triggerShake()
   }
 })

@@ -9,7 +9,9 @@ function initTheme() {
         mode.value = saved;
     } else {
         // defaults to system, maybe read media query
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const prefersDark = typeof window !== 'undefined' && window.matchMedia
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+            : false;
         mode.value = prefersDark ? 'dark' : 'light';
     }
 }
