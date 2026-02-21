@@ -1,0 +1,147 @@
+{
+    "overview": {
+        "title": "Dashboard Overview",
+        "refresh": "Aggiorna",
+        "updatedAt": "Ultimo aggiornamento",
+        "users": {
+            "title": "Utenti Totali",
+            "change": "rispetto al mese scorso"
+        },
+        "jobs": {
+            "title": "Offerte Attive",
+            "change": "rispetto al mese scorso"
+        },
+        "companies": {
+            "title": "Aziende",
+            "change": "rispetto al mese scorso"
+        },
+        "news": {
+            "title": "Notizie",
+            "change": "rispetto al mese scorso"
+        },
+        "charts": {
+            "registrations": "Nuove Registrazioni (30gg)",
+            "jobsPerWeek": "Offerte per Settimana (8 sett.)",
+            "loginMethods": "Metodi di Login",
+            "topSkills": "Top 10 Skill Richieste",
+            "topLanguages": "Top 10 Lingue Annunci"
+        },
+        "tables": {
+            "latestJobs": "Ultimi 10 Jobs",
+            "latestUsers": "Ultimi 10 Utenti"
+        },
+        "loading": "Caricamento in corso...",
+        "error": "Errore durante il caricamento dei dati.",
+        "retry": "Riprova"
+    },
+    "users": {
+        "title": "Utenti",
+        "totalBadge": "totali",
+        "searchPlaceholder": "Cerca per email o nome...",
+        "filters": {
+            "allMethods": "Tutti i metodi",
+            "email": "Email",
+            "google": "Google",
+            "linkedin": "LinkedIn",
+            "github": "GitHub"
+        },
+        "columns": {
+            "user": "Utente",
+            "email": "Email",
+            "method": "Metodo",
+            "registered": "Registrato",
+            "applications": "Candidature",
+            "actions": "Azioni"
+        },
+        "actions": {
+            "viewProfile": "Vedi profilo"
+        },
+        "details": {
+            "title": "Dettaglio Utente",
+            "description": "Informazioni complete del profilo utente.",
+            "personalInfo": "Informazioni Personali",
+            "role": "Ruolo",
+            "phone": "Telefono",
+            "location": "Posizione",
+            "bio": "Bio",
+            "noData": "Non specificato"
+        }
+    },
+    "companies": {
+        "title": "Aziende",
+        "addCompany": "Aggiungi Azienda",
+        "searchPlaceholder": "Cerca aziende...",
+        "industry": "Settore",
+        "website": "Sito Web",
+        "noItems": "Nessuna azienda trovata."
+    },
+    "jobsList": {
+        "title": "Offerte di lavoro",
+        "searchPlaceholder": "Cerca titolo o azienda...",
+        "filters": {
+            "allTypes": "Tutti i tipi",
+            "fullTime": "Full-time",
+            "partTime": "Part-time",
+            "contract": "Contratto",
+            "freelance": "Freelance",
+            "allStatuses": "Tutti gli stati",
+            "draft": "Bozza",
+            "active": "Attiva",
+            "closed": "Chiusa"
+        },
+        "columns": {
+            "title": "Titolo",
+            "location": "Luogo",
+            "type": "Tipo",
+            "salary": "Salario",
+            "published": "Pubblicato il",
+            "status": "Stato",
+            "actions": "Azioni"
+        },
+        "actions": {
+            "edit": "Modifica",
+            "viewApplications": "Candidature",
+            "closeJob": "Chiudi offerta"
+        },
+        "status": {
+            "draft": "Bozza",
+            "active": "Attiva",
+            "closed": "Chiusa"
+        }
+    },
+    "jobsMap": {
+        "title": "Mappa delle Offerte",
+        "subtitle": "Trova le opportunità di lavoro nella tua zona",
+        "noJobsLabel": "Nessuna offerta trovata sulla mappa."
+    },
+    "newsList": {
+        "title": "News e Aggiornamenti",
+        "addNews": "Nuova Notizia",
+        "searchPlaceholder": "Cerca notizie...",
+        "noItems": "Nessuna notizia trovata."
+    },
+    "analyticsPage": {
+        "title": "Analytics Avanzate",
+        "subtitle": "Rapporti dettagliati e metriche del portale",
+        "charts": {
+            "heatmap": "Attività per Giorno e Ora",
+            "registrations": "Registrazioni Ultimi 6 Mesi",
+            "jobs": "Offerte per Piattaforma"
+        }
+    },
+    "skillsPage": {
+        "title": "Trend delle Competenze",
+        "subtitle": "Analisi delle tecnologie più richieste dal mercato",
+        "categories": {
+            "all": "Tutte le categorie",
+            "frontend": "Frontend",
+            "backend": "Backend",
+            "devops": "DevOps",
+            "data": "Data Science"
+        },
+        "charts": {
+            "topSkills": "Competenze più Richieste",
+            "growth": "Trend di Crescita (Y/Y)"
+        }
+    }
+}
