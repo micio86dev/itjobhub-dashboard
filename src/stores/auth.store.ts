@@ -26,21 +26,18 @@ export const useAuthStore = defineStore('auth', {
             this.loading = true;
             this.error = null;
             try {
-                const responseData = await apiFetch<unknown>('/auth/login', {
+                const responseData = await apiFetch<{ accessToken?: string, token?: string, user: User }>('/auth/login', {
                     method: 'POST',
                     body: { email, password },
                 });
 
                 // Supponendo che il server risponda con { accessToken: string, user: User }
-                this.token = responseData.accessToken || responseData.token;
+                this.token = responseData.accessToken || responseData.token || null;
                 this.user = responseData.user;
                 Cookies.set('admin-token', this.token as string, { expires: 7 });
             } catch (err: unknown) {
-                if (err instanceof Error) {
-                    this.error = err.message || 'Errore durante il login';
-                } else {
-                    this.error = 'Errore durante il login';
-                }
+                const fetchErr = err as { data?: { message?: string }, message?: string };
+                this.error = fetchErr.data?.message || fetchErr.message || 'Errore durante il login';
                 throw err;
             } finally {
                 this.loading = false;
