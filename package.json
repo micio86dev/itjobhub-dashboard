@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5174",
+    "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
@@ -14,13 +14,12 @@
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/",
+    "format": "oxfmt src/",
     "prepare": "husky"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.0.2",
     "@googlemaps/markerclusterer": "^2.6.2",
-    "@tailwindcss/vite": "^4.2.0",
     "@tanstack/vue-query": "^5.92.9",
     "@tanstack/vue-table": "^8.21.3",
     "@vee-validate/zod": "^4.15.1",
@@ -35,17 +34,19 @@
     "pinia": "^3.0.4",
     "reka-ui": "^2.8.2",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.0",
     "tailwindcss-animate": "^1.0.7",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.28",
     "vue-echarts": "^8.0.1",
     "vue-i18n": "^11.2.8",
     "vue-router": "^5.0.2",
+    "vue-sonner": "^2.0.9",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@pinia/testing": "^1.0.3",
     "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "^4.2.0",
     "@tsconfig/node24": "^24.0.4",
     "@types/google.maps": "^3.58.1",
     "@types/js-cookie": "^3.0.6",
@@ -56,6 +57,7 @@
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.8.1",
+    "autoprefixer": "^10.4.24",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-oxlint": "~1.46.0",
@@ -67,8 +69,10 @@
     "lint-staged": "^16.2.7",
     "msw": "^2.12.10",
     "npm-run-all2": "^8.0.4",
+    "oxfmt": "^0.32.0",
     "oxlint": "~1.47.0",
-    "prettier": "3.8.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.0",
     "typescript": "~5.9.3",
     "vite": "^7.3.1",
     "vite-plugin-vue-devtools": "^8.0.6",
@@ -80,8 +84,8 @@
   },
   "lint-staged": {
     "*.{ts,vue}": [
-      "bash -c 'bun run lint'",
-      "bash -c 'bun run type-check'"
+      "bun run lint",
+      "bun run type-check"
     ]
   }
 }

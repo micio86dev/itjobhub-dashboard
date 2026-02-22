@@ -1,56 +1,58 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import { ArrowDownRight, ArrowUpRight } from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface Props {
+  title: string;
+  value: string | number;
+  change?: number;
+  icon?: unknown;
+  loading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+});
+
+const { t } = useI18n();
+
+const trend = computed(() => {
+  if (props.change === undefined || props.change === null) return null;
+  return props.change >= 0 ? "up" : "down";
+});
+
+const formattedChange = computed(() => {
+  if (props.change === undefined || props.change === null) return "";
+  return `${Math.abs(props.change)}%`;
+});
+</script>
+
 <template>
-  <Card 
-    class="hover:shadow-md transition-shadow duration-200"
-    data-testid="stat-card"
-  >
-    <CardHeader class="flex flex-row justify-between items-center space-y-0 pb-2">
-      <CardTitle class="font-medium text-muted-foreground text-sm">
-        {{ title }}
-      </CardTitle>
-      <component
-        v-if="icon"
-        :is="icon"
-        class="w-4 h-4 text-muted-foreground"
-      />
+  <Card data-testid="stat-card" :aria-label="t(title)" class="stat-card">
+    <CardHeader class="stat-header">
+      <span class="stat-label">{{ t(title) }}</span>
+      <component v-if="icon" :is="icon" class="icon-sm icon-muted" />
     </CardHeader>
     <CardContent>
-      <div v-if="loading" class="space-y-2">
-        <Skeleton class="w-[100px] h-8" />
-        <Skeleton class="w-[60px] h-4" />
-      </div>
-      <div v-else>
-        <div class="font-bold text-2xl" data-testid="stat-value">
-          {{ value }}
+      <div class="stack-sm">
+        <div v-if="loading" class="stack-sm">
+          <Skeleton class="h-8 w-24" data-testid="stat-loading" />
+          <Skeleton class="h-4 w-16" />
         </div>
-        <p 
-          v-if="change !== undefined"
-          class="flex items-center mt-1 text-sm"
-          :class="change >= 0 ? 'text-green-500' : 'text-red-500'"
-          data-testid="stat-change"
-        >
-          <ArrowUpRight v-if="change >= 0" class="mr-1 w-3 h-3" />
-          <ArrowDownRight v-else class="mr-1 w-3 h-3" />
-          <span class="font-medium">{{ Math.abs(change) }}%</span>
-          <span class="ml-1 font-normal text-muted-foreground">dal mese scorso</span>
-        </p>
+        <div v-else class="stack-xs">
+          <div class="stat-value" data-testid="stat-value">{{ value }}</div>
+          <div v-if="trend" class="stat-change" data-testid="stat-change">
+            <ArrowUpRight v-if="trend === 'up'" class="icon-sm icon-brand" />
+            <ArrowDownRight v-else class="icon-sm icon-danger" />
+            <span :class="trend === 'up' ? 'stat-change-up' : 'stat-change-down'">
+              {{ formattedChange }}
+            </span>
+          </div>
+        </div>
       </div>
     </CardContent>
   </Card>
 </template>
-
-<script setup lang="ts">
-import type { Component } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowUpRight, ArrowDownRight } from 'lucide-vue-next'
-
-export interface StatCardProps {
-  title: string
-  value: string | number
-  change?: number
-  icon?: Component
-  loading?: boolean
-}
-
-defineProps<StatCardProps>()
-</script>

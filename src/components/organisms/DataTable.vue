@@ -1,184 +1,26 @@
-<template>
-  <div class="space-y-4 w-full" data-testid="data-table">
-    <!-- Toolbar -->
-    <div class="flex flex-wrap justify-between items-center gap-4">
-      <div class="flex flex-1 items-center gap-2 min-w-[200px]">
-        <div v-if="searchable" class="relative w-full max-w-sm">
-          <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-          <Input 
-            v-model="globalFilter" 
-            placeholder="Cerca..." 
-            class="pl-9"
-            data-testid="search-input"
-          />
-        </div>
-        <slot name="toolbar-actions" />
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Selected count -->
-        <div v-if="selectedCount > 0" class="mr-2 text-muted-foreground text-sm">
-          {{ selectedCount }} selezionat{{ selectedCount === 1 ? 'o' : 'i' }}
-        </div>
-        <!-- Export CSV -->
-        <Button 
-          v-if="exportable" 
-          variant="outline" 
-          size="sm" 
-          @click="exportCSV"
-          data-testid="export-csv"
-        >
-          <Download class="mr-2 w-4 h-4" />
-          Esporta CSV
-        </Button>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <div class="border rounded-md">
-      <Table>
-        <TableHeader>
-          <TableRow 
-            v-for="headerGroup in table.getHeaderGroups()" 
-            :key="headerGroup.id"
-          >
-            <TableHead 
-              v-for="header in headerGroup.headers" 
-              :key="header.id"
-              :class="{ 'cursor-pointer select-none': header.column.getCanSort() }"
-              @click="header.column.getToggleSortingHandler()?.($event)"
-              :data-testid="header.column.getCanSort() ? `sort-${header.column.id}` : undefined"
-            >
-              <div class="flex items-center gap-1">
-                <FlexRender 
-                  v-if="!header.isPlaceholder" 
-                  :render="header.column.columnDef.header" 
-                  :props="header.getContext()" 
-                />
-                <template v-if="header.column.getCanSort()">
-                  <ArrowDown v-if="header.column.getIsSorted() === 'desc'" class="w-4 h-4" />
-                  <ArrowUp v-else-if="header.column.getIsSorted() === 'asc'" class="w-4 h-4" />
-                  <ArrowUpDown v-else class="w-4 h-4 text-muted-foreground" />
-                </template>
-              </div>
-            </TableHead>
-            <TableHead v-if="$slots['row-actions']" class="w-[80px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          <template v-if="loading">
-            <TableRow v-for="i in 5" :key="i" class="animate-pulse">
-              <TableCell v-for="(col, index) in columns" :key="col.id || index">
-                <Skeleton class="rounded w-full h-5" />
-              </TableCell>
-              <TableCell v-if="$slots['row-actions']">
-                <Skeleton class="rounded w-8 h-8" />
-              </TableCell>
-            </TableRow>
-          </template>
-
-          <template v-else-if="table.getRowModel().rows?.length">
-            <TableRow 
-              v-for="(row, index) in table.getRowModel().rows" 
-              :key="row.id"
-              :data-state="row.getIsSelected() ? 'selected' : undefined"
-              :data-testid="`row-${index}`"
-            >
-              <TableCell 
-                v-for="cell in row.getVisibleCells()" 
-                :key="cell.id"
-              >
-                <FlexRender 
-                  :render="cell.column.columnDef.cell" 
-                  :props="cell.getContext()" 
-                />
-              </TableCell>
-              <!-- Row Actions Slot -->
-              <TableCell v-if="$slots['row-actions']" class="text-right">
-                <slot name="row-actions" :row="row.original" />
-              </TableCell>
-            </TableRow>
-          </template>
-
-          <template v-else>
-            <TableRow>
-              <TableCell 
-                :colspan="columns.length + ($slots['row-actions'] ? 1 : 0)" 
-                class="h-48 text-center"
-                data-testid="empty-state"
-              >
-                <div class="flex flex-col justify-center items-center text-muted-foreground">
-                  <Inbox class="opacity-20 mb-2 w-10 h-10" />
-                  <p>Nessun risultato</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          </template>
-        </TableBody>
-      </Table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex justify-between items-center" v-if="totalRows !== undefined || table.getPageCount() > 1">
-      <div class="text-muted-foreground text-sm">
-        {{ paginationText }}
-      </div>
-      <div class="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.setPageIndex(0)"
-          :disabled="!table.getCanPreviousPage()"
-        >
-          <ChevronsLeft class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.previousPage()"
-          :disabled="!table.getCanPreviousPage()"
-          data-testid="page-prev"
-        >
-          <ChevronLeft class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.nextPage()"
-          :disabled="!table.getCanNextPage()"
-          data-testid="page-next"
-        >
-          <ChevronRight class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.setPageIndex(table.getPageCount() - 1)"
-          :disabled="!table.getCanNextPage()"
-        >
-          <ChevronsRight class="w-4 h-4" />
-        </Button>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts" generic="T extends Record<string, unknown>">
-import { ref, computed } from 'vue'
+<script setup lang="ts" generic="T extends object">
+import { computed, h, ref, useSlots } from "vue";
+import type { ColumnDef, SortingState } from "@tanstack/vue-table";
 import {
-  useVueTable,
+  FlexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
-  FlexRender
-} from '@tanstack/vue-table'
-import type { 
-  ColumnDef, 
-  SortingState
-} from '@tanstack/vue-table'
-
+  useVueTable,
+} from "@tanstack/vue-table";
+import {
+  ArrowDownUp,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-vue-next";
+import { useI18n } from "vue-i18n";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -186,118 +28,265 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+} from "@/components/ui/table";
 
-import {
-  Search,
-  Download,
-  ArrowUpDown,
-  ArrowDown,
-  ArrowUp,
-  Inbox,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight
-} from 'lucide-vue-next'
+interface Props {
+  columns: ColumnDef<T, unknown>[];
+  data: T[];
+  loading?: boolean;
+  totalRows?: number;
+  pageSize?: number;
+  searchable?: boolean;
+  exportable?: boolean;
+  selectable?: boolean;
+}
 
-const props = withDefaults(defineProps<{
-  columns: ColumnDef<T, unknown>[]
-  data: T[]
-  loading?: boolean
-  totalRows?: number
-  pageSize?: number
-  searchable?: boolean
-  exportable?: boolean
-}>(), {
+const props = withDefaults(defineProps<Props>(), {
   loading: false,
   pageSize: 25,
-  searchable: false,
+  searchable: true,
   exportable: false,
-})
+  selectable: true,
+});
 
-const sorting = ref<SortingState>([])
-const globalFilter = ref('')
-const rowSelection = ref({})
+const { t } = useI18n();
+const slots = useSlots();
 
-// Costruiamo la tabella
+const sorting = ref<SortingState>([]);
+const globalFilter = ref("");
+const rowSelection = ref({});
+const pageSize = ref(props.pageSize);
+const pageIndex = ref(0);
+
+const hasRowActions = computed(() => Boolean(slots["row-actions"]));
+
+const selectionColumn: ColumnDef<T, unknown> = {
+  id: "select",
+  header: ({ table }) =>
+    props.selectable
+      ? h(Checkbox, {
+          checked: table.getIsAllPageRowsSelected(),
+          "onUpdate:checked": table.getToggleAllPageRowsSelectedHandler(),
+          "data-testid": "table-checkbox-all",
+        })
+      : null,
+  cell: ({ row }) =>
+    props.selectable
+      ? h(Checkbox, {
+          checked: row.getIsSelected(),
+          "onUpdate:checked": row.getToggleSelectedHandler(),
+        })
+      : null,
+  enableSorting: false,
+  enableHiding: false,
+};
+
+const actionsColumn: ColumnDef<T, unknown> = {
+  id: "actions",
+  header: () => null,
+  cell: ({ row }) => (slots["row-actions"] ? slots["row-actions"]({ row }) : null),
+  enableSorting: false,
+  enableHiding: false,
+};
+
+const resolvedColumns = computed(() => {
+  const columns = [...props.columns];
+  if (hasRowActions.value) columns.push(actionsColumn);
+  if (props.selectable) columns.unshift(selectionColumn);
+  return columns;
+});
+
 const table = useVueTable({
-  get data() { return props.data },
-  get columns() { return props.columns },
+  get data() {
+    return props.data;
+  },
+  get columns() {
+    return resolvedColumns.value;
+  },
   state: {
-    get sorting() { return sorting.value },
-    get globalFilter() { return globalFilter.value },
-    get rowSelection() { return rowSelection.value },
+    get sorting() {
+      return sorting.value;
+    },
+    get globalFilter() {
+      return globalFilter.value;
+    },
+    get rowSelection() {
+      return rowSelection.value;
+    },
+    get pagination() {
+      return { pageIndex: pageIndex.value, pageSize: pageSize.value };
+    },
   },
-  onSortingChange: updaterOrValue => {
-    sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue
+  onPaginationChange: (updater) => {
+    const current = { pageIndex: pageIndex.value, pageSize: pageSize.value };
+    const next = typeof updater === "function" ? updater(current) : updater;
+    pageIndex.value = next.pageIndex;
+    pageSize.value = next.pageSize;
   },
-  onGlobalFilterChange: updaterOrValue => {
-    globalFilter.value = typeof updaterOrValue === 'function' ? updaterOrValue(globalFilter.value) : updaterOrValue
+  onSortingChange: (updater) => {
+    sorting.value = typeof updater === "function" ? updater(sorting.value) : updater;
   },
-  onRowSelectionChange: updaterOrValue => {
-    rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue
+  onGlobalFilterChange: (updater) => {
+    globalFilter.value = typeof updater === "function" ? updater(globalFilter.value) : updater;
   },
+  onRowSelectionChange: (updater) => {
+    rowSelection.value = typeof updater === "function" ? updater(rowSelection.value) : updater;
+  },
+  globalFilterFn: "includesString",
   getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
   getSortedRowModel: getSortedRowModel(),
   getFilteredRowModel: getFilteredRowModel(),
-  initialState: {
-    pagination: {
-      pageSize: props.pageSize
-    }
-  }
-})
+  getPaginationRowModel: getPaginationRowModel(),
+});
 
-const selectedCount = computed(() => Object.keys(rowSelection.value).length)
+const rangeLabel = computed(() => {
+  const total = props.totalRows ?? props.data.length;
+  const from = total === 0 ? 0 : pageIndex.value * pageSize.value + 1;
+  const to = Math.min(total, (pageIndex.value + 1) * pageSize.value);
+  return t("table.range", { from, to, total });
+});
 
-const paginationText = computed(() => {
-  const pageIndex = table.getState().pagination.pageIndex
-  const pageSize = table.getState().pagination.pageSize
-  
-  if (props.totalRows !== undefined) {
-    const start = pageIndex * pageSize + 1
-    const end = Math.min((pageIndex + 1) * pageSize, props.totalRows)
-    return `${start}-${end} di ${props.totalRows}`
-  } else {
-    const total = table.getFilteredRowModel().rows.length
-    if (total === 0) return ''
-    const start = pageIndex * pageSize + 1
-    const end = Math.min((pageIndex + 1) * pageSize, total)
-    return `${start}-${end} di ${total}`
-  }
-})
+const selectedCount = computed(() => table.getSelectedRowModel().rows.length);
 
-const exportCSV = () => {
-  const rows = table.getFilteredRowModel().rows
-  if (rows.length === 0) return
+function exportCsv() {
+  const rows = table.getRowModel().rows.map((row) => row.original);
+  const firstRow = rows[0];
+  if (!firstRow) return;
 
-  // Estrae gli header
-  const visibleColumns = table.getVisibleLeafColumns()
-  const headers = visibleColumns.map(col => typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id)
-  
-  // Estrae i dati
-  const csvRows = rows.map(row => {
-    return visibleColumns.map(col => {
-      const val = row.getValue(col.id)
-      return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : String(val ?? '')
-    }).join(',')
-  })
+  const headers = Object.keys(firstRow as Record<string, unknown>);
+  const csv = [headers.join(",")];
+  rows.forEach((row) => {
+    const values = headers.map((key) => {
+      const value = row[key as keyof T];
+      const stringValue = value === null || value === undefined ? "" : String(value);
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    });
+    csv.push(values.join(","));
+  });
 
-  // Assembla il CSV
-  const csvContent = [headers.join(','), ...csvRows].join('\n')
-  
-  // Scarica il file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.setAttribute('href', url)
-  link.setAttribute('download', `export_${new Date().toISOString().split('T')[0]}.csv`)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  const blob = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "export.csv";
+  link.click();
+  URL.revokeObjectURL(url);
 }
 </script>
+
+<template>
+  <div class="stack-md" data-testid="data-table">
+    <div class="table-toolbar">
+      <div class="table-toolbar-left">
+        <Input
+          v-if="searchable"
+          data-testid="search-input"
+          class="table-search-input"
+          :placeholder="t('table.search')"
+          :model-value="globalFilter"
+          @update:model-value="(value) => table.setGlobalFilter(value)"
+        />
+        <slot name="toolbar-actions" />
+      </div>
+      <div class="table-toolbar-right">
+        <span v-if="selectedCount" class="table-selected-count">
+          {{ t("table.selected", { count: selectedCount }) }}
+        </span>
+        <Button
+          v-if="exportable"
+          data-testid="export-csv"
+          variant="outline"
+          size="sm"
+          @click="exportCsv"
+        >
+          {{ t("table.export") }}
+        </Button>
+      </div>
+    </div>
+
+    <Table>
+      <TableHeader>
+        <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+          <TableHead v-for="header in headerGroup.headers" :key="header.id">
+            <div
+              v-if="!header.isPlaceholder"
+              class="table-column-header"
+              :data-testid="`sort-${header.id}`"
+              @click="header.column.getToggleSortingHandler()?.($event)"
+            >
+              <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
+              <ArrowDownUp v-if="header.column.getCanSort()" class="icon-sm icon-muted" />
+            </div>
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-if="loading">
+          <TableCell :colspan="table.getAllColumns().length" class="table-loading-cell">
+            <div class="table-loading-skeleton">
+              <Skeleton v-for="index in 5" :key="index" class="h-6 w-full" />
+            </div>
+          </TableCell>
+        </TableRow>
+        <TableRow v-else-if="table.getRowModel().rows.length === 0">
+          <TableCell :colspan="table.getAllColumns().length">
+            <div class="table-empty-state" data-testid="empty-state">
+              {{ t("table.empty") }}
+            </div>
+          </TableCell>
+        </TableRow>
+        <TableRow
+          v-for="(row, index) in table.getRowModel().rows"
+          :key="row.id"
+          :data-testid="`row-${index}`"
+        >
+          <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+            <div class="table-cell-content">
+              <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+
+    <div class="table-pagination">
+      <span>{{ rangeLabel }}</span>
+      <div class="table-pagination-buttons">
+        <Button
+          variant="ghost"
+          size="icon"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.setPageIndex(0)"
+        >
+          <ChevronsLeft class="icon-sm" />
+        </Button>
+        <Button
+          data-testid="page-prev"
+          variant="ghost"
+          size="icon"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()"
+        >
+          <ChevronLeft class="icon-sm" />
+        </Button>
+        <Button
+          data-testid="page-next"
+          variant="ghost"
+          size="icon"
+          :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()"
+        >
+          <ChevronRight class="icon-sm" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          :disabled="!table.getCanNextPage()"
+          @click="table.setPageIndex(table.getPageCount() - 1)"
+        >
+          <ChevronsRight class="icon-sm" />
+        </Button>
+      </div>
+    </div>
+  </div>
+</template>

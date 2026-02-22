@@ -1,44 +1,50 @@
-import { ref, readonly, watch } from 'vue';
-import Cookies from 'js-cookie';
+import { readonly, ref } from "vue";
+import Cookies from "js-cookie";
 
-const mode = ref<'light' | 'dark' | 'system'>('system');
+type ThemeMode = "light" | "dark";
 
-function initTheme() {
-    const saved = Cookies.get('admin-theme') as 'light' | 'dark' | 'system' | undefined;
-    if (saved) {
-        mode.value = saved;
-    } else {
-        // defaults to system, maybe read media query
-        const prefersDark = typeof window !== 'undefined' && window.matchMedia
-            ? window.matchMedia('(prefers-color-scheme: dark)').matches
-            : false;
-        mode.value = prefersDark ? 'dark' : 'light';
-    }
+const THEME_COOKIE = "admin-theme";
+const theme = ref<ThemeMode>("light");
+let initialized = false;
+
+function applyTheme(mode: ThemeMode) {
+  if (mode === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
 }
 
-if (typeof window !== 'undefined') {
-    initTheme();
-}
+function initializeTheme() {
+  if (initialized) return;
+  initialized = true;
 
-watch(mode, (newMode) => {
-    if (typeof document !== 'undefined') {
-        if (newMode === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-    Cookies.set('admin-theme', newMode, { expires: 365 });
-}, { immediate: true });
+  const cookieValue = Cookies.get(THEME_COOKIE) as ThemeMode | undefined;
+  if (cookieValue === "light" || cookieValue === "dark") {
+    theme.value = cookieValue;
+  } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
+    theme.value = "dark";
+  }
+
+  applyTheme(theme.value);
+}
 
 export function useTheme() {
-    const toggleTheme = () => {
-        mode.value = mode.value === 'dark' ? 'light' : 'dark';
-    };
+  initializeTheme();
 
-    return {
-        theme: readonly(mode),
-        toggleTheme,
-        setMode: (m: 'light' | 'dark' | 'system') => { mode.value = m; }
-    };
+  function setMode(mode: ThemeMode) {
+    theme.value = mode;
+    Cookies.set(THEME_COOKIE, mode, { expires: 365 });
+    applyTheme(mode);
+  }
+
+  function toggleTheme() {
+    setMode(theme.value === "dark" ? "light" : "dark");
+  }
+
+  return {
+    theme: readonly(theme),
+    toggleTheme,
+    setMode,
+  };
 }

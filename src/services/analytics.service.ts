@@ -1,62 +1,48 @@
-import { apiFetch } from '@/services/api.client'
-import type { AnalyticsOverview, LoginMethod } from '@/types/api'
+import type { AdminStats, Language, LoginMethodDist, TimelinePoint, TopSkill } from "@/types/api";
+import { apiFetch } from "@/services/api.client";
 
-export const analyticsService = {
-    async getOverviewStats(): Promise<AnalyticsOverview> {
-        try {
-            const response = await apiFetch<AnalyticsOverview>('/admin/stats')
-            return response
-        } catch {
-            // Mock data if endpoint not fully available
-            return {
-                users: 1543,
-                jobs: 842,
-                companies: 124,
-                news: 45,
-                usersChange: 12.5,
-                jobsChange: -2.3
-            }
-        }
-    },
+function unwrapData<T>(response: { data: T } | T): T {
+  if (typeof response === "object" && response !== null && "data" in response) {
+    return (response as { data: T }).data;
+  }
+  return response as T;
+}
 
-    async getRegistrationsTimeline(days: number = 30): Promise<Array<{ date: string, count: number }>> {
-        try {
-            return await apiFetch<Array<{ date: string, count: number }>>(`/admin/stats/registrations-timeline?days=${days}`)
-        } catch {
-            return []
-        }
-    },
+export async function getOverviewStats(): Promise<AdminStats["data"]> {
+  const response = await apiFetch<AdminStats>("/admin/stats");
+  return response.data;
+}
 
-    async getJobsTimeline(weeks: number = 8): Promise<Array<{ week: string, count: number }>> {
-        try {
-            return await apiFetch<Array<{ week: string, count: number }>>(`/admin/stats/jobs-timeline?weeks=${weeks}`)
-        } catch {
-            return []
-        }
-    },
+export async function getRegistrationsTimeline(days = 30): Promise<TimelinePoint[]> {
+  const response = await apiFetch<{ data: TimelinePoint[] }>(
+    "/admin/stats/registrations-timeline",
+    { query: { days } },
+  );
+  return unwrapData(response);
+}
 
-    async getLoginMethodsDistribution(): Promise<Array<{ method: LoginMethod, count: number }>> {
-        try {
-            return await apiFetch<Array<{ method: LoginMethod, count: number }>>('/admin/stats/login-methods')
-        } catch {
-            return []
-        }
-    },
+export async function getJobsTimeline(weeks = 8): Promise<TimelinePoint[]> {
+  const response = await apiFetch<{ data: TimelinePoint[] }>("/admin/stats/jobs-timeline", {
+    query: { weeks },
+  });
+  return unwrapData(response);
+}
 
-    async getTopSkills(limit: number = 10): Promise<Array<{ skill: string, count: number }>> {
-        try {
-            const res = await apiFetch<Array<{ skill: string, count: number }>>(`/jobs/stats/skills?limit=${limit}`)
-            return res
-        } catch {
-            return []
-        }
-    },
+export async function getLoginMethodsDistribution(): Promise<LoginMethodDist[]> {
+  const response = await apiFetch<{ data: LoginMethodDist[] }>("/admin/stats/login-methods");
+  return unwrapData(response);
+}
 
-    async getTopLanguages(limit: number = 10): Promise<Array<{ language: string, count: number }>> {
-        try {
-            return await apiFetch<Array<{ language: string, count: number }>>(`/admin/stats/top-languages?limit=${limit}`)
-        } catch {
-            return []
-        }
-    }
+export async function getTopSkills(limit = 10): Promise<TopSkill[]> {
+  const response = await apiFetch<{ data: TopSkill[] }>("/jobs/stats/skills", {
+    query: { limit },
+  });
+  return unwrapData(response);
+}
+
+export async function getTopLanguages(limit = 10): Promise<Language[]> {
+  const response = await apiFetch<{ data: Language[] }>("/admin/stats/top-languages", {
+    query: { limit },
+  });
+  return unwrapData(response);
 }

@@ -1,102 +1,94 @@
-<template>
-  <header class="top-0 z-10 sticky flex items-center bg-background px-4 md:px-6 border-b h-16 shrink-0">
-    <div class="flex items-center gap-4">
-      <SidebarTrigger class="md:hidden" />
-      <div class="hidden md:flex items-center space-x-2 text-muted-foreground text-sm">
-        <!-- Minimal Breadcrumb based on route meta -->
-        <span class="font-medium text-foreground capitalize">{{ currentRouteName }}</span>
-      </div>
-    </div>
+<script setup lang="ts">
+import { computed } from "vue";
+import { RouterLink, useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { Globe, LogOut, User } from "lucide-vue-next";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import ThemeToggle from "@/components/layout/ThemeToggle.vue";
+import { useAuthStore } from "@/stores/auth.store";
 
-    <div class="flex items-center gap-4 ml-auto">
-      <!-- Language Selector -->
+const route = useRoute();
+const { t, locale } = useI18n();
+const authStore = useAuthStore();
+
+const breadcrumbs = computed(
+  () => (route.meta.breadcrumb ?? []) as Array<{ name: string; path?: string }>,
+);
+const titleKey = computed(() => {
+  const lastCrumb = breadcrumbs.value[breadcrumbs.value.length - 1];
+  return (route.meta.title as string | undefined) ?? lastCrumb?.name;
+});
+
+const locales = ["it", "en", "fr", "es", "de"] as const;
+
+const userInitials = computed(() => {
+  if (!authStore.user) return "";
+  const first = authStore.user.first_name?.[0] ?? "";
+  const last = authStore.user.last_name?.[0] ?? "";
+  return `${first}${last}`.toUpperCase();
+});
+</script>
+
+<template>
+  <header class="header-container" data-testid="app-header">
+    <div class="header-left">
+      <SidebarTrigger class="hide-mobile" :aria-label="t('header.openNav')" />
+      <nav class="header-breadcrumb" data-testid="breadcrumb">
+        <template v-for="(crumb, index) in breadcrumbs" :key="crumb.name">
+          <span v-if="index > 0">/</span>
+          <RouterLink v-if="crumb.path" :to="crumb.path" class="header-breadcrumb-link">
+            {{ t(crumb.name) }}
+          </RouterLink>
+          <span v-else>{{ t(crumb.name) }}</span>
+        </template>
+      </nav>
+      <h1 class="header-title">
+        {{ titleKey ? t(titleKey) : "" }}
+      </h1>
+    </div>
+    <div class="header-right">
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="ghost" size="icon" :aria-label="t('layout.header.changeLanguage')">
-            <Globe class="w-[1.2rem] h-[1.2rem]" />
+          <Button variant="ghost" size="sm" class="btn-icon-gap" data-testid="language-selector">
+            <Globe class="icon-sm" />
+            <span class="uppercase">{{ locale }}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem @click="setLocale('it')">Italiano</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('en')">English</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('fr')">Français</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('es')">Español</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('de')">Deutsch</DropdownMenuItem>
+          <DropdownMenuItem v-for="lang in locales" :key="lang" @click="locale = lang">
+            {{ lang.toUpperCase() }}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <!-- Theme Toggle -->
       <ThemeToggle />
-
-      <!-- User Dropdown -->
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="ghost" class="relative rounded-full w-8 h-8">
-            <Avatar class="w-8 h-8">
-              <AvatarImage :src="authStore.user?.avatar || ''" :alt="authStore.userName" />
-              <AvatarFallback>{{ authStore.user?.firstName?.[0] || 'U' }}</AvatarFallback>
+          <Button variant="ghost" size="icon" data-testid="avatar-menu">
+            <Avatar>
+              <AvatarImage v-if="authStore.user?.avatar" :src="authStore.user.avatar" />
+              <AvatarFallback>{{ userInitials }}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-56" align="end" force-mount>
-          <DropdownMenuLabel class="font-normal">
-            <div class="flex flex-col space-y-1">
-              <p class="font-medium text-sm leading-none">{{ authStore.userName }}</p>
-              <p class="text-muted-foreground text-xs leading-none">{{ authStore.user?.email }}</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="end">
           <DropdownMenuItem>
-            <!-- TODO: Profile page route -->
-            <UserIcon class="mr-2 w-4 h-4" />
-            <span>{{ t('layout.header.profile') }}</span>
+            <User class="icon-sm" style="margin-right: 0.5rem" />
+            {{ t("header.profile") }}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem @click="handleLogout" class="text-destructive">
-            <LogOut class="mr-2 w-4 h-4" />
-            <span>{{ t('layout.header.logout') }}</span>
+          <DropdownMenuItem data-testid="logout-menu-item" @click="authStore.logout">
+            <LogOut class="icon-sm" style="margin-right: 0.5rem" />
+            {{ t("header.logout") }}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
   </header>
 </template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.store'
-import { useI18n } from 'vue-i18n'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import ThemeToggle from '@/components/layout/ThemeToggle.vue'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-
-import { Globe, User as UserIcon, LogOut } from 'lucide-vue-next'
-
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
-const { t, locale } = useI18n()
-
-const currentRouteName = computed(() => {
-  return typeof route.name === 'string' ? route.name.replace('-', ' ') : 'Dashboard'
-})
-
-function setLocale(lang: string) {
-  locale.value = lang
-}
-
-async function handleLogout() {
-  await authStore.logout()
-  router.push('/login')
-}
-</script>

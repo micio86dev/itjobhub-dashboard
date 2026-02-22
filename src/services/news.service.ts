@@ -1,17 +1,11 @@
-import { apiFetch } from '@/services/api.client'
-import type { PaginatedResponse, News } from '@/types/api'
+import type { News, NewsFilterParams, PaginatedResponse } from "@/types/api";
+import { apiFetch } from "@/services/api.client";
 
-export const newsService = {
-    async getNews(params?: Record<string, unknown>): Promise<PaginatedResponse<News>> {
-        const query = new URLSearchParams()
-        if (params) {
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== null) {
-                    query.append(key, String(params[key]))
-                }
-            })
-        }
-
-        return await apiFetch<PaginatedResponse<News>>(`/news?${query.toString()}`)
-    }
+export async function getNews(
+  params: NewsFilterParams = {},
+): Promise<PaginatedResponse<News>["data"]> {
+  const response = await apiFetch<PaginatedResponse<News>>("/news", {
+    query: params,
+  });
+  return response.data;
 }

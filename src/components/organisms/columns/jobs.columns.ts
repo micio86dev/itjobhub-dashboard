@@ -1,76 +1,55 @@
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
-import type { Job } from '@/types/api'
-import { Badge } from '@/components/ui/badge'
-import { formatDistanceToNow } from 'date-fns'
-import { it } from 'date-fns/locale'
+import type { ColumnDef } from "@tanstack/vue-table";
+import { h } from "vue";
+import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import type { Job } from "@/types/api";
 
-export const getJobsColumns = (t: (key: string) => string): ColumnDef<Job, unknown>[] => [
+export function buildJobsColumns(t: (key: string) => string): ColumnDef<Job>[] {
+  return [
     {
-        id: 'title',
-        header: t('jobsList.columns.title'),
-        cell: ({ row }) => {
-            const job = row.original
-            return h('div', { class: 'flex flex-col' }, [
-                h('span', { class: 'font-semibold' }, job.title),
-                h('span', { class: 'text-sm text-muted-foreground' }, job.company?.name || '-')
-            ])
-        }
+      accessorKey: "title",
+      header: () => t("jobs.table.title"),
+      cell: ({ row }) => {
+        const job = row.original;
+        return h("div", { class: "space-y-1" }, [
+          h("div", { class: "text-sm font-medium" }, job.title),
+          h("div", { class: "text-xs text-muted-foreground" }, job.company?.name ?? ""),
+        ]);
+      },
     },
     {
-        accessorKey: 'location',
-        header: t('jobsList.columns.location'),
-        cell: ({ row }) => {
-            return h('span', { class: 'text-sm' }, Array.isArray(row.original.location) ? row.original.location.join(', ') : row.original.location || '-')
-        }
+      accessorKey: "employment_type",
+      header: () => t("jobs.table.type"),
+      cell: ({ row }) => row.original.employment_type ?? t("common.placeholder"),
     },
     {
-        accessorKey: 'employment_type',
-        header: t('jobsList.columns.type'),
-        cell: ({ row }) => {
-            const type = row.original.employment_type
-            return h(Badge, { variant: 'secondary' } as unknown as Record<string, unknown>, () => type)
-        }
+      accessorKey: "contractType",
+      header: () => t("jobs.table.contract"),
+      cell: ({ row }) => row.original.employment_type ?? t("common.placeholder"),
     },
     {
-        id: 'salary',
-        header: t('jobsList.columns.salary'),
-        cell: ({ row }) => {
-            const min = row.original.salary_min
-            const max = row.original.salary_max
-            if (!min && !max) return '-'
-            if (min && !max) return `Da €${min.toLocaleString()}`
-            if (!min && max) return `Fino a €${max.toLocaleString()}`
-            return `€${min?.toLocaleString()} - €${max?.toLocaleString()}`
-        }
+      accessorKey: "experience_level",
+      header: () => t("jobs.table.level"),
+      cell: ({ row }) => row.original.experience_level ?? t("common.placeholder"),
     },
     {
-        accessorKey: 'created_at',
-        header: t('jobsList.columns.published'),
-        cell: ({ row }) => {
-            const dateStr = row.original.created_at
-            if (!dateStr) return '-'
-            const date = new Date(dateStr)
-            return h('div', { title: date.toISOString(), class: 'text-sm text-muted-foreground' },
-                formatDistanceToNow(date, { addSuffix: true, locale: it })
-            )
-        }
+      accessorKey: "language",
+      header: () => t("jobs.table.language"),
+      cell: ({ row }) => row.original.language ?? t("common.placeholder"),
     },
     {
-        accessorKey: 'status',
-        header: t('jobsList.columns.status'),
-        cell: ({ row }) => {
-            const status = row.original.status || 'draft'
-            let variant: 'default' | 'secondary' | 'destructive' | 'outline' = 'outline'
-
-            switch (status.toLowerCase()) {
-                case 'active': variant = 'default'; break;
-                case 'closed': variant = 'destructive'; break;
-                case 'draft':
-                default: variant = 'secondary'; break;
-            }
-
-            return h(Badge, { variant } as unknown as Record<string, unknown>, () => t(`jobsList.status.${status.toLowerCase()}`))
-        }
-    }
-]
+      accessorKey: "status",
+      header: () => t("jobs.table.status"),
+      cell: ({ row }) => h(Badge, { variant: "secondary" }, () => row.original.status),
+    },
+    {
+      accessorKey: "published_at",
+      header: () => t("jobs.table.published"),
+      cell: ({ row }) => {
+        const value = row.original.published_at;
+        if (!value) return t("common.placeholder");
+        return formatDistanceToNow(new Date(value), { addSuffix: true });
+      },
+    },
+  ];
+}

@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it } from "vitest";
 
-describe('useTheme', () => {
-    it('stub', () => { expect(1).toBe(1); })
-    it('stub', () => { expect(1).toBe(1); })
-    it('stub', () => { expect(1).toBe(1); })
-    it('stub', () => { expect(1).toBe(1); })
-})
+describe("useTheme", () => {
+   
+  it.skip("composable tests blocked by reka-ui WeakMap VTU bug", () => {
+    // This test will be re-enabled once the reka-ui + @vue/test-utils WeakMap bug is resolved
+  });
+});

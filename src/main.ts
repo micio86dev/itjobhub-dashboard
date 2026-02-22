@@ -1,18 +1,34 @@
-import './assets/main.css'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import Cookies from "js-cookie";
+import { VueQueryPlugin, QueryClient } from "@tanstack/vue-query";
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import { i18n } from './i18n'
-import { VueQueryPlugin } from '@tanstack/vue-query'
+import App from "./App.vue";
+import router from "./router";
+import { i18n } from "./i18n";
+import "./assets/main.css";
+import "./assets/semantic.css";
+import { useAuthStore } from "@/stores/auth.store";
 
-import App from './App.vue'
-import router from './router'
+const app = createApp(App);
+const pinia = createPinia();
 
-const app = createApp(App)
+app.use(pinia);
+app.use(router);
+app.use(i18n);
+app.use(VueQueryPlugin, {
+  queryClient: new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  }),
+});
 
-app.use(createPinia())
-app.use(router)
-app.use(i18n)
-app.use(VueQueryPlugin)
+const authStore = useAuthStore(pinia);
+if (Cookies.get("admin-token")) {
+  authStore.fetchMe();
+}
 
-app.mount('#app')
+app.mount("#app");

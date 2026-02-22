@@ -1,17 +1,22 @@
-import { apiFetch } from '@/services/api.client'
-import type { PaginatedResponse, User } from '@/types/api'
+import type { PaginatedResponse, User } from "@/types/api";
 
-export const usersService = {
-    async getUsers(params?: Record<string, unknown>): Promise<PaginatedResponse<User>> {
-        const query = new URLSearchParams()
-        if (params) {
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== null) {
-                    query.append(key, String(params[key]))
-                }
-            })
-        }
-
-        return await apiFetch<PaginatedResponse<User>>(`/users?${query.toString()}`)
-    }
+export async function getUsers(
+  params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    loginMethod?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  } = {},
+): Promise<PaginatedResponse<User>["data"]> {
+  void params;
+  // TODO: endpoint GET /users is missing in backend.
+  return {
+    data: [],
+    total: 0,
+    page: params.page ?? 1,
+    limit: params.limit ?? 25,
+    totalPages: 0,
+  };
 }

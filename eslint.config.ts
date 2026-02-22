@@ -1,10 +1,10 @@
-import { globalIgnores } from 'eslint/config'
-import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
-import pluginVue from 'eslint-plugin-vue'
-import pluginPlaywright from 'eslint-plugin-playwright'
-import pluginVitest from '@vitest/eslint-plugin'
-import pluginOxlint from 'eslint-plugin-oxlint'
-import skipFormatting from 'eslint-config-prettier/flat'
+import { globalIgnores } from "eslint/config";
+import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
+import pluginVue from "eslint-plugin-vue";
+import pluginPlaywright from "eslint-plugin-playwright";
+import pluginVitest from "@vitest/eslint-plugin";
+import pluginOxlint from "eslint-plugin-oxlint";
+import skipFormatting from "eslint-config-prettier/flat";
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
 // import { configureVueProject } from '@vue/eslint-config-typescript'
@@ -13,34 +13,42 @@ import skipFormatting from 'eslint-config-prettier/flat'
 
 export default defineConfigWithVueTs(
   {
-    name: 'app/files-to-lint',
-    files: ['**/*.{vue,ts,mts,tsx}'],
+    name: "app/files-to-lint",
+    files: ["**/*.{vue,ts,mts,tsx}"],
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  globalIgnores(["**/dist/**", "**/dist-ssr/**", "**/coverage/**"]),
 
-  ...pluginVue.configs['flat/essential'],
+  ...pluginVue.configs["flat/essential"],
   vueTsConfigs.recommended,
 
   {
-    ...pluginPlaywright.configs['flat/recommended'],
-    files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}'],
+    ...pluginPlaywright.configs["flat/recommended"],
+    files: ["e2e/**/*.{test,spec}.{js,ts,jsx,tsx}"],
   },
 
   {
     ...pluginVitest.configs.recommended,
-    files: ['src/**/__tests__/*'],
+    files: ["src/**/__tests__/*", "src/**/__specs__/*"],
   },
 
-  ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
+  {
+    // Disable multi-word-component-names for UI components (shadcn-vue conventions)
+    files: ["src/components/ui/**/*.vue"],
+    rules: {
+      "vue/multi-word-component-names": "off",
+    },
+  },
 
-  skipFormatting,
   {
     rules: {
-      'no-console': 'error',
-      'no-debugger': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
-      'vue/multi-word-component-names': 'off'
-    }
-  }
-)
+      "no-console": "error",
+      "no-debugger": "error",
+      "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+
+  ...pluginOxlint.buildFromOxlintConfigFile(".oxlintrc.json"),
+
+  skipFormatting,
+);

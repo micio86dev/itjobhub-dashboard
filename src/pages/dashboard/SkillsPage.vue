@@ -1,78 +1,64 @@
-<template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="font-bold text-3xl tracking-tight">{{ t('skillsPage.title') }}</h2>
-        <p class="text-muted-foreground">{{ t('skillsPage.subtitle') }}</p>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="flex sm:flex-row flex-col gap-4 mb-6">
-      <Select v-model="filters.category" @update:model-value="() => refetch()">
-        <SelectTrigger class="w-[200px]">
-          <SelectValue :placeholder="t('skillsPage.categories.all')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ t('skillsPage.categories.all') }}</SelectItem>
-          <SelectItem value="frontend">{{ t('skillsPage.categories.frontend') }}</SelectItem>
-          <SelectItem value="backend">{{ t('skillsPage.categories.backend') }}</SelectItem>
-          <SelectItem value="devops">{{ t('skillsPage.categories.devops') }}</SelectItem>
-          <SelectItem value="data">{{ t('skillsPage.categories.data') }}</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    <!-- Layout -->
-    <div class="gap-6 grid lg:grid-cols-2">
-      <!-- Top Skills -->
-      <TopList
-        :title="t('skillsPage.charts.topSkills')"
-        :items="topSkillsData?.map(d => ({ label: d.skill, count: d.count })) || []"
-        :loading="isLoading"
-      />
-      <!-- Trend / Growth -->
-      <BarChart
-        :title="t('skillsPage.charts.growth')"
-        :data="generateMockGrowthTrend()"
-        :horizontal="true"
-        :loading="isLoading"
-      />
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery } from '@tanstack/vue-query'
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useQuery } from "@tanstack/vue-query";
+import type { ColumnDef } from "@tanstack/vue-table";
+import BarChart from "@/components/organisms/charts/BarChart.vue";
+import DataTable from "@/components/organisms/DataTable.vue";
+import { getTopSkills } from "@/services/jobs.service";
+import type { TopSkill } from "@/types/api";
 
-import { analyticsService } from '@/services/analytics.service'
+const { t } = useI18n();
 
-import TopList from '@/components/organisms/TopList.vue'
-import BarChart from '@/components/organisms/charts/BarChart.vue'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+const topSkillsQuery = useQuery({
+  queryKey: ["skills", "top"],
+  queryFn: () => getTopSkills(30),
+  staleTime: 1000 * 60 * 5,
+});
 
-const { t } = useI18n()
+const chartData = computed(() =>
+  (topSkillsQuery.data.value ?? []).map((item) => ({
+    label: item.skill,
+    value: item.count,
+  })),
+);
 
-const filters = ref({
-  category: 'all'
-})
+const tableData = computed<TopSkill[]>(() => topSkillsQuery.data.value ?? []);
 
-const { data: topSkillsData, isLoading, refetch } = useQuery({
-  queryKey: ['skills_top', filters],
-  queryFn: () => analyticsService.getTopSkills(20), // Can be mocked to change based on category
-  staleTime: 5 * 60 * 1000
-})
-
-// Mock growth trend
-const generateMockGrowthTrend = () => {
-  return [
-    { label: 'React', value: 25 },
-    { label: 'Vue.js', value: 18 },
-    { label: 'Python', value: 34 },
-    { label: 'Go', value: 45 },
-    { label: 'Rust', value: 60 }
-  ]
-}
+const columns = computed<ColumnDef<TopSkill>[]>(() => [
+  { accessorKey: "skill", header: () => t("skills.table.skill") },
+  { accessorKey: "count", header: () => t("skills.table.jobs") },
+  { accessorKey: "trend", header: () => t("skills.table.trend") },
+]);
 </script>
+
+<template>
+  <section class="page-container" data-testid="skills-page">
+    <div class="page-header">
+      <h2 class="page-title">{{ t("skills.title") }}</h2>
+    </div>
+
+    <div class="charts-grid-2">
+      <BarChart
+        :title="'skills.charts.topJobs'"
+        :data="chartData"
+        :horizontal="true"
+        :loading="topSkillsQuery.isLoading.value"
+      />
+      <BarChart
+        :title="'skills.charts.topSearches'"
+        :data="[]"
+        :horizontal="true"
+        :loading="true"
+      />
+    </div>
+
+    <DataTable
+      :columns="columns"
+      :data="tableData"
+      :loading="topSkillsQuery.isLoading.value"
+      :searchable="false"
+      :selectable="false"
+    />
+  </section>
+</template>

@@ -1,66 +1,42 @@
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
-import type { User } from '@/types/api'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { formatDistanceToNow } from 'date-fns'
-import { it } from 'date-fns/locale'
+import type { ColumnDef } from "@tanstack/vue-table";
+import { h } from "vue";
+import { formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import type { User } from "@/types/api";
 
-export const getUsersColumns = (t: (key: string) => string): ColumnDef<User, unknown>[] => [
+export function buildUsersColumns(t: (key: string) => string): ColumnDef<User>[] {
+  return [
     {
-        id: 'user',
-        header: t('users.columns.user'),
-        cell: ({ row }) => {
-            const user = row.original
-            const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
-            return h('div', { class: 'flex items-center gap-3' }, [
-                h(Avatar, { class: 'h-8 w-8' }, () => [
-                    h(AvatarImage, { src: user.avatar || '', alt: user.firstName }),
-                    h(AvatarFallback, () => initials)
-                ]),
-                h('div', { class: 'flex flex-col' }, [
-                    h('span', { class: 'font-medium' }, `${user.firstName} ${user.lastName}`),
-                ])
-            ])
-        }
+      accessorKey: "first_name",
+      header: () => t("users.table.name"),
+      cell: ({ row }) => {
+        const user = row.original;
+        const fullName = `${user.first_name} ${user.last_name}`.trim();
+        return h("div", { class: "text-sm font-medium" }, fullName || user.email);
+      },
     },
     {
-        accessorKey: 'lastName',
-        header: 'Cognome',
+      accessorKey: "email",
+      header: () => t("users.table.email"),
     },
     {
-        accessorKey: 'email',
-        header: t('users.columns.email'),
+      accessorKey: "oauth_provider",
+      header: () => t("users.table.method"),
+      cell: ({ row }) => {
+        const provider = row.original.oauth_provider ?? "email";
+        const label = provider.toString().toUpperCase();
+        return h(Badge, { variant: "secondary" }, () => label);
+      },
     },
     {
-        accessorKey: 'role', // Spec says login method, but User api type has role, oauth_provider
-        header: t('users.columns.method'),
-        cell: ({ row }) => {
-            const provider = row.original.oauth_provider || 'email'
-
-            let bgColorClass = ''
-
-            switch (provider) {
-                case 'email': bgColorClass = 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100'; break;
-                case 'google': bgColorClass = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'; break;
-                case 'linkedin': bgColorClass = 'bg-blue-800 text-white dark:bg-blue-700'; break;
-                case 'github': bgColorClass = 'bg-black text-white dark:bg-zinc-900'; break;
-                default: bgColorClass = 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-100'; break;
-            }
-
-            return h(Badge, { class: bgColorClass, variant: 'outline' } as unknown as Record<string, unknown>, () => provider)
-        }
+      accessorKey: "created_at",
+      header: () => t("users.table.created"),
+      cell: ({ row }) => {
+        const value = row.original.created_at;
+        if (!value) return t("common.placeholder");
+        const date = new Date(value);
+        return formatDistanceToNow(date, { addSuffix: true });
+      },
     },
-    {
-        accessorKey: 'created_at',
-        header: t('users.columns.registered'),
-        cell: ({ row }) => {
-            const dateStr = row.original.created_at
-            if (!dateStr) return '-'
-            const date = new Date(dateStr)
-            return h('div', { title: date.toISOString(), class: 'text-muted-foreground' },
-                formatDistanceToNow(date, { addSuffix: true, locale: it })
-            )
-        }
-    }
-]
+  ];
+}

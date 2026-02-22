@@ -1,19 +1,19 @@
+<script setup lang="ts">
+import AppSidebar from "@/components/layout/AppSidebar.vue";
+import AppHeader from "@/components/layout/AppHeader.vue";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+</script>
+
 <template>
   <SidebarProvider>
-    <AppSidebar />
-    
-    <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
-      <AppHeader />
-      <main class="flex-1 bg-muted/20 p-4 md:p-6 overflow-y-auto">
-        <RouterView />
-      </main>
+    <div class="dashboard-wrapper" data-testid="dashboard-layout">
+      <AppSidebar />
+      <SidebarInset class="dashboard-main-column">
+        <AppHeader />
+        <main class="dashboard-main-content" data-testid="dashboard-main">
+          <slot />
+        </main>
+      </SidebarInset>
     </div>
   </SidebarProvider>
 </template>
-
-<script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { SidebarProvider } from '@/components/ui/sidebar'
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import AppHeader from '@/components/layout/AppHeader.vue'
-</script>

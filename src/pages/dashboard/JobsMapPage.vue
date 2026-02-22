@@ -1,55 +1,68 @@
-<template>
-  <div class="flex flex-col h-[calc(100vh-10rem)]">
-    <div class="flex justify-between items-end mb-6">
-      <div>
-        <h2 class="font-bold text-3xl tracking-tight">{{ t('jobsMap.title') }}</h2>
-        <p class="text-muted-foreground">{{ t('jobsMap.subtitle') }}</p>
-      </div>
-    </div>
-
-    <Alert v-if="isError" variant="destructive" class="mb-6">
-      <AlertTitle>{{ t('overview.error') }}</AlertTitle>
-      <AlertDescription class="flex justify-between items-center">
-        <span>{{ t('overview.error') }}</span>
-        <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
-      </AlertDescription>
-    </Alert>
-
-    <div class="flex lg:flex-row flex-col flex-1 gap-6 min-h-0">
-      <div class="flex flex-col w-full lg:w-80 h-full min-h-0 overflow-y-auto shrink-0">
-        <MapFilters :result-count="jobsData?.total || 0" @update:filters="handleFilterUpdate" />
-      </div>
-
-      <div class="flex-1 bg-muted/20 border rounded-xl min-h-[500px] lg:min-h-0 overflow-hidden">
-        <JobsMap :jobs="(jobsData?.data as any) || []" :filters="filters" :loading="isLoading" />
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery } from '@tanstack/vue-query'
+import { computed, reactive } from "vue";
+import { useI18n } from "vue-i18n";
+import { useQuery } from "@tanstack/vue-query";
+import JobsMap from "@/components/organisms/maps/JobsMap.vue";
+import MapFilters, { type MapFiltersState } from "@/components/organisms/maps/MapFilters.vue";
+import { getJobsWithLocation } from "@/services/jobs.service";
+import { getTopSkills } from "@/services/jobs.service";
+import { getCompanies } from "@/services/companies.service";
 
-import { jobsService } from '@/services/jobs.service'
+const { t } = useI18n();
 
-import JobsMap from '@/components/organisms/JobsMap.vue'
-import MapFilters from '@/components/organisms/MapFilters.vue'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+const filters = reactive<MapFiltersState>({
+  skills: [],
+  remote: null,
+  company: null,
+  contractType: null,
+  experienceLevel: null,
+  publishedWithin: null,
+});
 
-const { t } = useI18n()
+const jobsQuery = useQuery({
+  queryKey: ["jobs-map"],
+  queryFn: () => getJobsWithLocation({ page: 1, limit: 500 }),
+  staleTime: 1000 * 60 * 5,
+});
 
-const filters = ref<Record<string, unknown>>({})
+const skillsQuery = useQuery({
+  queryKey: ["jobs-map", "skills"],
+  queryFn: () => getTopSkills(200),
+  staleTime: 1000 * 60 * 10,
+});
 
-const { data: jobsData, isLoading, isError, refetch } = useQuery({
-  queryKey: ['jobsMap', filters],
-  queryFn: () => jobsService.getJobs(filters.value),
-  staleTime: 5 * 60 * 1000
-})
+const companiesQuery = useQuery({
+  queryKey: ["jobs-map", "companies"],
+  queryFn: () => getCompanies({ page: 1, limit: 200 }),
+  staleTime: 1000 * 60 * 10,
+});
 
-const handleFilterUpdate = (newFilters: Record<string, unknown>) => {
-  filters.value = { ...newFilters }
-}
+const jobs = computed(() => jobsQuery.data.value?.data ?? []);
+const skillsOptions = computed(() => (skillsQuery.data.value ?? []).map((item) => item.skill));
+const companyOptions = computed(() =>
+  (companiesQuery.data.value?.data ?? []).map((company) => ({
+    id: company.id,
+    name: company.name,
+  })),
+);
 </script>
+
+<template>
+  <section class="map-page-layout" data-testid="jobs-map-page">
+    <aside class="map-sidebar">
+      <MapFilters
+        :filters="filters"
+        :count="jobs.length"
+        :skills-options="skillsOptions"
+        :company-options="companyOptions"
+        @update:filters="(value) => Object.assign(filters, value)"
+      />
+    </aside>
+    <div class="map-container">
+      <JobsMap :jobs="jobs" :filters="filters" />
+      <div v-if="jobsQuery.isLoading.value" class="map-loading">
+        {{ t("common.loading") }}
+      </div>
+    </div>
+  </section>
+</template>

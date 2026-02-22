@@ -1,29 +1,61 @@
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from "vitest";
+import { config } from "@vue/test-utils";
+import Cookies from "js-cookie";
 
-// Polyfill matchMedia for jsdom (not available natively)
-// This is an environment polyfill, NOT a business logic mock
-Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-    })),
+config.global.stubs = {};
+
+// Mock reka-ui primitives to avoid WeakMap issues
+vi.mock("reka-ui", async () => {
+  const vue = await vi.importActual<typeof import("vue")>("vue");
+  const { defineComponent, h } = vue;
+  type VNode = import("vue").VNode;
+  const Primitive = defineComponent({
+    name: "RekaUiPrimitive",
+    props: ["as", "asChild"],
+    setup(
+      props: { as?: string; asChild?: boolean },
+      {
+        slots,
+        attrs,
+      }: { slots: { default?: () => VNode[] }; attrs: Record<string, unknown> },
+    ) {
+      return () => h(props.as || "div", { ...attrs, class: attrs.class }, slots.default?.());
+    },
+  });
+
+  return {
+    CheckboxRoot: Primitive,
+    CheckboxIndicator: Primitive,
+    useForwardPropsEmits: (props: unknown) => props,
+  };
 });
 
-// Clean up between tests
+if (!window.matchMedia) {
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: (query: string) => ({
+      media: query,
+      matches: false,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }),
+  });
+}
+
+beforeEach(() => {
+  Object.keys(Cookies.get() as Record<string, string>).forEach((key) => {
+    Cookies.remove(key);
+  });
+  document.documentElement.classList.remove("dark");
+});
+
 afterEach(() => {
-    // Reset document.cookie
-    document.cookie.split(';').forEach((c) => {
-        document.cookie = c
-            .replace(/^ +/, '')
-            .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-    });
-    // Reset document classes
-    document.documentElement.classList.remove('dark');
+  Object.keys(Cookies.get() as Record<string, string>).forEach((key) => {
+    Cookies.remove(key);
+  });
+  document.documentElement.classList.remove("dark");
 });
