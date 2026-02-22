@@ -66,7 +66,7 @@ Located in `e2e/pages/`:
 
 ```
 - testDir: "./e2e"
-- baseURL: "http://localhost:5175"
+- baseURL: "http://localhost:5173"
 - timeout: 30000ms
 - expect.timeout: 5000ms
 - retries: 0 (dev environment)
@@ -92,7 +92,7 @@ npx playwright show-report
 
 ## Pre-requisites for Execution
 
-1. ✅ Dashboard development server running on `http://localhost:5175`
+1. ✅ Dashboard development server running on `http://localhost:5173`
 2. ✅ Backend API accessible at configured `PUBLIC_API_URL`
 3. ✅ Test utilities available (`e2e/utils/auth.ts` with `loginAsAdmin()`)
 4. ✅ All dependencies installed (`@playwright/test` v1.58.2, etc.)
@@ -127,7 +127,7 @@ Files that can be ignored in error reports:
 
 ## Next Steps
 
-1. **Start development server**: `npm run dev` (port 5175)
+1. **Start development server**: `npm run dev` (port 5173)
 2. **Ensure backend is running**: API on configured URL
 3. **Run test suite**: `npm run test:e2e`
 4. **View results**: Open `playwright-report/index.html` after test completion
