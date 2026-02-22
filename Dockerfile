@@ -18,17 +18,17 @@ ENV PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
 WORKDIR /app
 
 # Copy dependency manifests
-COPY package.json ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-# Note: bun.lock is gitignored in this repo, so we cannot use --frozen-lockfile
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build Vue SPA (generates dist/)
-RUN bun run build
+# We use direct vite build to avoid potential issues with the script wrapper
+RUN bun x vite build
 
 # ==========================================
 # Stage 2: Production Runtime (Nginx)
