@@ -1,4 +1,37 @@
 {
+    "auth": {
+        "loginTitle": "Accesso Admin",
+        "loginDesc": "Inserisci email e password per accedere al pannello di amministrazione",
+        "emailPlaceholder": "admin@example.com",
+        "passwordPlaceholder": "••••••••",
+        "loginBtn": "Accedi",
+        "forgotPassword": "Password dimenticata?",
+        "emailRequired": "L'email è obbligatoria",
+        "emailInvalid": "Email non valida",
+        "passwordMin": "Almeno 8 caratteri",
+        "success": "Successo",
+        "welcome": "Benvenuto, {name}"
+    },
+    "layout": {
+        "brand": "DevBoards.io",
+        "slogan": "Il portale per tech jobs",
+        "sidebar": {
+            "mainMenu": "Menu Principale",
+            "overview": "Overview",
+            "users": "Utenti",
+            "companies": "Companies",
+            "jobs": "Jobs",
+            "map": "Mappa Jobs",
+            "news": "News",
+            "analytics": "Analytics",
+            "skills": "Skills"
+        },
+        "header": {
+            "profile": "Profilo",
+            "logout": "Logout",
+            "changeLanguage": "Cambia Lingua"
+        }
+    },
     "overview": {
         "title": "Dashboard Overview",
         "refresh": "Aggiorna",

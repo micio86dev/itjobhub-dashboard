@@ -12,17 +12,21 @@ export const getUsersColumns = (t: (key: string) => string): ColumnDef<User, unk
         header: t('users.columns.user'),
         cell: ({ row }) => {
             const user = row.original
-            const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase()
+            const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
             return h('div', { class: 'flex items-center gap-3' }, [
                 h(Avatar, { class: 'h-8 w-8' }, () => [
-                    h(AvatarImage, { src: user.avatar || '', alt: user.first_name }),
+                    h(AvatarImage, { src: user.avatar || '', alt: user.firstName }),
                     h(AvatarFallback, () => initials)
                 ]),
                 h('div', { class: 'flex flex-col' }, [
-                    h('span', { class: 'font-medium' }, `${user.first_name} ${user.last_name}`),
+                    h('span', { class: 'font-medium' }, `${user.firstName} ${user.lastName}`),
                 ])
             ])
         }
+    },
+    {
+        accessorKey: 'lastName',
+        header: 'Cognome',
     },
     {
         accessorKey: 'email',

@@ -1,19 +1,15 @@
 <template>
   <div class="space-y-6">
     <div class="flex justify-between items-center">
-       <h2 class="font-bold text-3xl tracking-tight">{{ t('jobsList.title') }}</h2>
+      <h2 class="font-bold text-3xl tracking-tight">{{ t('jobsList.title') }}</h2>
     </div>
 
     <!-- Filters -->
     <div class="flex sm:flex-row flex-col gap-4">
       <div class="relative w-full sm:max-w-xs">
         <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input
-          v-model="filters.search"
-          :placeholder="t('jobsList.searchPlaceholder')"
-          class="pl-9"
-          @input="handleSearch"
-        />
+        <Input v-model="filters.search" :placeholder="t('jobsList.searchPlaceholder')" class="pl-9"
+          @input="handleSearch" />
       </div>
       <Select v-model="filters.type" @update:model-value="() => refetch()">
         <SelectTrigger class="w-[180px]">
@@ -43,30 +39,25 @@
     <Alert v-if="isError" variant="destructive">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Impossibile caricare le offerte di lavoro.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
 
     <!-- Table -->
-    <DataTable
-      :columns="columns"
-      :data="(jobsData?.data as any) || []"
-      :loading="isLoading"
-      :total-rows="jobsData?.total"
-      :page-size="10"
-    >
+    <DataTable :columns="columns" :data="(jobsData?.data as any) || []" :loading="isLoading"
+      :total-rows="jobsData?.total" :page-size="10">
       <template #row-actions>
         <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" class="h-8">
-              {{ t('jobsList.actions.edit') }}
-            </Button>
-            <Button variant="secondary" size="sm" class="h-8">
-              {{ t('jobsList.actions.viewApplications') }}
-            </Button>
-            <Button variant="ghost" size="sm" class="hover:bg-destructive/10 h-8 text-destructive hover:text-destructive">
-              {{ t('jobsList.actions.closeJob') }}
-            </Button>
+          <Button variant="outline" size="sm" class="h-8">
+            {{ t('jobsList.actions.edit') }}
+          </Button>
+          <Button variant="secondary" size="sm" class="h-8">
+            {{ t('jobsList.actions.viewApplications') }}
+          </Button>
+          <Button variant="ghost" size="sm" class="hover:bg-destructive/10 h-8 text-destructive hover:text-destructive">
+            {{ t('jobsList.actions.closeJob') }}
+          </Button>
         </div>
       </template>
     </DataTable>

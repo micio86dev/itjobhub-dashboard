@@ -13,12 +13,8 @@
     <div class="flex sm:flex-row flex-col gap-4">
       <div class="relative w-full sm:max-w-xs">
         <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input
-          v-model="filters.search"
-          :placeholder="t('users.searchPlaceholder')"
-          class="pl-9"
-          @input="handleSearch"
-        />
+        <Input v-model="filters.search" :placeholder="t('users.searchPlaceholder')" class="pl-9"
+          @input="handleSearch" />
       </div>
       <Select v-model="filters.loginMethod" @update:model-value="() => refetch()">
         <SelectTrigger class="w-[180px]">
@@ -37,19 +33,14 @@
     <Alert v-if="isError" variant="destructive">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Impossibile caricare gli utenti.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="refetch">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
 
     <!-- Table -->
-    <DataTable
-      :columns="columns"
-      :data="(usersData?.data as any) || []"
-      :loading="isLoading"
-      :total-rows="usersData?.total"
-      :page-size="10"
-    >
+    <DataTable :columns="columns" :data="(usersData?.data as any) || []" :loading="isLoading"
+      :total-rows="usersData?.total" :page-size="10">
       <template #row-actions="{ row }">
         <Button variant="ghost" size="sm" @click="openSheet(row as unknown as User)">
           {{ t('users.actions.viewProfile') }}
@@ -64,21 +55,23 @@
           <SheetTitle>{{ t('users.details.title') }}</SheetTitle>
           <SheetDescription>{{ t('users.details.description') }}</SheetDescription>
         </SheetHeader>
-        
+
         <div v-if="selectedUser" class="space-y-6 mt-6">
           <div class="flex items-center gap-4">
             <Avatar class="w-16 h-16">
               <AvatarImage :src="selectedUser.avatar || ''" />
-              <AvatarFallback>{{ selectedUser.first_name?.[0] }}{{ selectedUser.last_name?.[0] }}</AvatarFallback>
+              <AvatarFallback>{{ selectedUser.firstName?.[0] }}{{ selectedUser.lastName?.[0] }}</AvatarFallback>
             </Avatar>
             <div>
-              <h3 class="font-semibold text-xl">{{ selectedUser.first_name }} {{ selectedUser.last_name }}</h3>
+              <h3 class="font-semibold text-xl">{{ selectedUser.firstName }} {{ selectedUser.lastName }}</h3>
               <p class="text-muted-foreground text-sm">{{ selectedUser.email }}</p>
             </div>
           </div>
-          
+
           <div class="space-y-3">
-            <h4 class="flex items-center gap-2 font-medium"><UserIcon class="w-4 h-4"/> {{ t('users.details.personalInfo') }}</h4>
+            <h4 class="flex items-center gap-2 font-medium">
+              <UserIcon class="w-4 h-4" /> {{ t('users.details.personalInfo') }}
+            </h4>
             <div class="gap-4 grid grid-cols-2 text-sm">
               <div>
                 <span class="text-muted-foreground">{{ t('users.details.role') }}:</span>
@@ -94,7 +87,7 @@
               </div>
             </div>
           </div>
-          
+
           <div v-if="selectedUser.bio" class="space-y-2 text-sm">
             <span class="text-muted-foreground">{{ t('users.details.bio') }}:</span>
             <p class="bg-muted p-3 rounded-md">{{ selectedUser.bio }}</p>

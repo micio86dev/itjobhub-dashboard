@@ -11,7 +11,8 @@ import {
     TooltipComponent,
     LegendComponent,
     GridComponent,
-    VisualMapComponent
+    VisualMapComponent,
+    GraphicComponent
 } from 'echarts/components'
 
 use([
@@ -24,5 +25,6 @@ use([
     TooltipComponent,
     LegendComponent,
     GridComponent,
-    VisualMapComponent
+    VisualMapComponent,
+    GraphicComponent
 ])

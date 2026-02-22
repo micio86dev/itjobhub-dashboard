@@ -14,36 +14,25 @@
     <!-- Charts Layout -->
     <div class="gap-6 grid md:grid-cols-2">
       <!-- Registrations (Line) -->
-      <LineChart
-        :title="t('analyticsPage.charts.registrations')"
-        :series="[{ name: 'Registrations', data: registrationsData?.map(d => d.count) || [] }]"
-        :x-labels="registrationsData?.map(d => d.date) || []"
-        :loading="isRegistrationsLoading"
-      />
+      <LineChart :title="t('analyticsPage.charts.registrations')"
+        :series="[{ name: t('analyticsPage.charts.registrations'), data: registrationsData?.map(d => d.count) || [] }]"
+        :x-labels="registrationsData?.map(d => d.date) || []" :loading="isRegistrationsLoading" />
       <!-- Jobs per Platform (Bar) -->
-      <BarChart
-        :title="t('analyticsPage.charts.jobs')"
-        :data="jobsData?.map(d => ({ label: d.week, value: d.count })) || []"
-        :loading="isJobsLoading"
-      />
+      <BarChart :title="t('analyticsPage.charts.jobs')"
+        :data="jobsData?.map(d => ({ label: d.week, value: d.count })) || []" :loading="isJobsLoading" />
     </div>
 
     <div class="gap-6 grid md:grid-cols-3">
       <div class="md:col-span-1 shadow-sm border rounded-xl overflow-hidden">
-        <DonutChart
-          :title="t('overview.charts.loginMethods')"
+        <DonutChart :title="t('overview.charts.loginMethods')"
           :data="loginMethodsData?.map(d => ({ name: d.method, value: d.count })) || []"
-          :loading="isLoginMethodsLoading"
-        />
+          :loading="isLoginMethodsLoading" />
       </div>
       <div class="md:col-span-2 shadow-sm border rounded-xl overflow-hidden">
-        <HeatmapChart
-          :title="t('analyticsPage.charts.heatmap')"
+        <HeatmapChart :title="t('analyticsPage.charts.heatmap')"
           :x-labels="['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']"
           :y-labels="['00-04', '04-08', '08-12', '12-16', '16-20', '20-24']"
-          :data="heatmapData || generateMockHeatmap()"
-          :loading="false"
-        />
+          :data="heatmapData || generateMockHeatmap()" :loading="false" />
       </div>
     </div>
   </div>
@@ -76,7 +65,7 @@ const { data: registrationsData, isLoading: isRegistrationsLoading } = useQuery(
 
 const { data: jobsData, isLoading: isJobsLoading } = useQuery({
   queryKey: ['analytics_jobsTimeline'],
-  queryFn: () => analyticsService.getJobsTimeline(12), 
+  queryFn: () => analyticsService.getJobsTimeline(12),
   staleTime
 })
 

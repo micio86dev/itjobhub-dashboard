@@ -1,0 +1,180 @@
+{
+    "auth": {
+        "loginTitle": "Acceso Administrador",
+        "loginDesc": "Ingresa tu correo y contraseña para acceder al panel de administración",
+        "emailPlaceholder": "admin@example.com",
+        "passwordPlaceholder": "••••••••",
+        "loginBtn": "Iniciar sesión",
+        "forgotPassword": "¿Olvidaste tu contraseña?",
+        "emailRequired": "El correo es obligatorio",
+        "emailInvalid": "Formato de correo no válido",
+        "passwordMin": "Al menos 8 caracteres",
+        "success": "Éxito",
+        "welcome": "Bienvenido, {name}"
+    },
+    "layout": {
+        "brand": "DevBoards.io",
+        "slogan": "El portal de trabajos tecnológicos",
+        "sidebar": {
+            "mainMenu": "Menú Principal",
+            "overview": "Resumen",
+            "users": "Usuarios",
+            "companies": "Empresas",
+            "jobs": "Trabajos",
+            "map": "Mapa de Trabajos",
+            "news": "Noticias",
+            "analytics": "Analíticas",
+            "skills": "Habilidades"
+        },
+        "header": {
+            "profile": "Perfil",
+            "logout": "Cerrar sesión",
+            "changeLanguage": "Cambiar idioma"
+        }
+    },
+    "overview": {
+        "title": "Resumen del Panel",
+        "refresh": "Actualizar",
+        "updatedAt": "Última actualización",
+        "users": {
+            "title": "Usuarios Totales",
+            "change": "vs el mes pasado"
+        },
+        "jobs": {
+            "title": "Trabajos Activos",
+            "change": "vs el mes pasado"
+        },
+        "companies": {
+            "title": "Empresas",
+            "change": "vs el mes pasado"
+        },
+        "news": {
+            "title": "Noticias",
+            "change": "vs el mes pasado"
+        },
+        "charts": {
+            "registrations": "Nuevos Registros (30d)",
+            "jobsPerWeek": "Trabajos por Semana (8s)",
+            "loginMethods": "Métodos de Inicio de Sesión",
+            "topSkills": "Top 10 Habilidades Solicitadas",
+            "topLanguages": "Top 10 Idiomas de Trabajos"
+        },
+        "tables": {
+            "latestJobs": "Últimos 10 Trabajos",
+            "latestUsers": "Últimos 10 Usuarios"
+        },
+        "loading": "Cargando...",
+        "error": "Error al cargar datos.",
+        "retry": "Reintentar"
+    },
+    "users": {
+        "title": "Usuarios",
+        "totalBadge": "total",
+        "searchPlaceholder": "Buscar por correo o nombre...",
+        "filters": {
+            "allMethods": "Todos los métodos",
+            "email": "Correo",
+            "google": "Google",
+            "linkedin": "LinkedIn",
+            "github": "GitHub"
+        },
+        "columns": {
+            "user": "Usuario",
+            "email": "Correo",
+            "method": "Método",
+            "registered": "Registrado",
+            "applications": "Solicitudes",
+            "actions": "Acciones"
+        },
+        "actions": {
+            "viewProfile": "Ver perfil"
+        },
+        "details": {
+            "title": "Detalle del Usuario",
+            "description": "Información completa del perfil del usuario.",
+            "personalInfo": "Información Personal",
+            "role": "Rol",
+            "phone": "Teléfono",
+            "location": "Ubicación",
+            "bio": "Biografía",
+            "noData": "No especificado"
+        }
+    },
+    "companies": {
+        "title": "Empresas",
+        "addCompany": "Añadir Empresa",
+        "searchPlaceholder": "Buscar empresas...",
+        "industry": "Industria",
+        "website": "Sitio Web",
+        "noItems": "No se encontraron empresas."
+    },
+    "jobsList": {
+        "title": "Trabajos",
+        "searchPlaceholder": "Buscar título o empresa...",
+        "filters": {
+            "allTypes": "Todos los tipos",
+            "fullTime": "Tiempo completo",
+            "partTime": "Medio tiempo",
+            "contract": "Contrato",
+            "freelance": "Freelance",
+            "allStatuses": "Todos los estados",
+            "draft": "Borrador",
+            "active": "Activo",
+            "closed": "Cerrado"
+        },
+        "columns": {
+            "title": "Título",
+            "location": "Ubicación",
+            "type": "Tipo",
+            "salary": "Salario",
+            "published": "Publicado el",
+            "status": "Estado",
+            "actions": "Acciones"
+        },
+        "actions": {
+            "edit": "Editar",
+            "viewApplications": "Solicitudes",
+            "closeJob": "Cerrar trabajo"
+        },
+        "status": {
+            "draft": "Borrador",
+            "active": "Activo",
+            "closed": "Cerrado"
+        }
+    },
+    "jobsMap": {
+        "title": "Mapa de Trabajos",
+        "subtitle": "Encuentra oportunidades de trabajo en tu área",
+        "noJobsLabel": "No se encontraron trabajos en el mapa."
+    },
+    "newsList": {
+        "title": "Noticias y Actualizaciones",
+        "addNews": "Nuevo Artículo",
+        "searchPlaceholder": "Buscar noticias...",
+        "noItems": "No se encontraron noticias."
+    },
+    "analyticsPage": {
+        "title": "Analíticas Avanzadas",
+        "subtitle": "Informes detallados y métricas del portal",
+        "charts": {
+            "heatmap": "Actividad por Día y Hora",
+            "registrations": "Registros Últimos 6 Meses",
+            "jobs": "Trabajos por Plataforma"
+        }
+    },
+    "skillsPage": {
+        "title": "Tendencias de Habilidades",
+        "subtitle": "Análisis de las tecnologías más solicitadas en el mercado",
+        "categories": {
+            "all": "Todas las categorías",
+            "frontend": "Frontend",
+            "backend": "Backend",
+            "devops": "DevOps",
+            "data": "Ciencia de Datos"
+        },
+        "charts": {
+            "topSkills": "Habilidades Más Solicitadas",
+            "growth": "Tendencia de Crecimiento (A/A)"
+        }
+    }
+}

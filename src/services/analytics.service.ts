@@ -20,73 +20,43 @@ export const analyticsService = {
     },
 
     async getRegistrationsTimeline(days: number = 30): Promise<Array<{ date: string, count: number }>> {
-        // TODO: Endpoint GET /admin/stats/registrations-timeline missing, mocking data
-        const data = []
-        const now = new Date()
-        for (let i = days - 1; i >= 0; i--) {
-            const d = new Date(now)
-            d.setDate(d.getDate() - i)
-            data.push({
-                date: d.toISOString().split('T')[0] || '',
-                count: Math.floor(Math.random() * 50) + 10
-            })
+        try {
+            return await apiFetch<Array<{ date: string, count: number }>>(`/admin/stats/registrations-timeline?days=${days}`)
+        } catch {
+            return []
         }
-        return data
     },
 
     async getJobsTimeline(weeks: number = 8): Promise<Array<{ week: string, count: number }>> {
-        // TODO: Endpoint GET /admin/stats/jobs-timeline missing, mocking data
-        const data = []
-        const now = new Date()
-        for (let i = weeks - 1; i >= 0; i--) {
-            const d = new Date(now)
-            d.setDate(d.getDate() - i * 7)
-            data.push({
-                week: `W${i + 1}`,
-                count: Math.floor(Math.random() * 100) + 20
-            })
+        try {
+            return await apiFetch<Array<{ week: string, count: number }>>(`/admin/stats/jobs-timeline?weeks=${weeks}`)
+        } catch {
+            return []
         }
-        return data
     },
 
     async getLoginMethodsDistribution(): Promise<Array<{ method: LoginMethod, count: number }>> {
-        // TODO: Endpoint GET /admin/stats/login-methods missing, mocking data
-        return [
-            { method: 'email', count: 854 },
-            { method: 'google', count: 421 },
-            { method: 'linkedin', count: 215 },
-            { method: 'github', count: 53 }
-        ]
+        try {
+            return await apiFetch<Array<{ method: LoginMethod, count: number }>>('/admin/stats/login-methods')
+        } catch {
+            return []
+        }
     },
 
     async getTopSkills(limit: number = 10): Promise<Array<{ skill: string, count: number }>> {
         try {
-            const res = await apiFetch<Array<{ skill: string, count: number }>>('/jobs/stats/skills')
-            return res.slice(0, limit)
+            const res = await apiFetch<Array<{ skill: string, count: number }>>(`/jobs/stats/skills?limit=${limit}`)
+            return res
         } catch {
-            return [
-                { skill: 'Vue.js', count: 320 },
-                { skill: 'TypeScript', count: 280 },
-                { skill: 'Node.js', count: 250 },
-                { skill: 'React', count: 210 },
-                { skill: 'Python', count: 190 },
-                { skill: 'Docker', count: 150 },
-                { skill: 'AWS', count: 120 },
-                { skill: 'MongoDB', count: 95 },
-                { skill: 'PostgreSQL', count: 80 },
-                { skill: 'Tailwind CSS', count: 75 }
-            ].slice(0, limit)
+            return []
         }
     },
 
     async getTopLanguages(limit: number = 10): Promise<Array<{ language: string, count: number }>> {
-        // TODO: Endpoint GET /admin/stats/top-languages missing, mocking data
-        return [
-            { language: 'Italian', count: 680 },
-            { language: 'English', count: 420 },
-            { language: 'Spanish', count: 85 },
-            { language: 'French', count: 45 },
-            { language: 'German', count: 20 }
-        ].slice(0, limit)
+        try {
+            return await apiFetch<Array<{ language: string, count: number }>>(`/admin/stats/top-languages?limit=${limit}`)
+        } catch {
+            return []
+        }
     }
 }

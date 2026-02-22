@@ -12,12 +12,8 @@
     <div class="flex sm:flex-row flex-col gap-4 mb-6">
       <div class="relative w-full sm:max-w-md">
         <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input
-          v-model="filters.search"
-          :placeholder="t('newsList.searchPlaceholder')"
-          class="pl-9"
-          @input="handleSearch"
-        />
+        <Input v-model="filters.search" :placeholder="t('newsList.searchPlaceholder')" class="pl-9"
+          @input="handleSearch" />
       </div>
     </div>
 
@@ -25,7 +21,7 @@
     <Alert v-if="isError" variant="destructive">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Impossibile caricare le notizie.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
@@ -44,17 +40,15 @@
       </Card>
     </div>
 
-    <div v-else-if="newsData?.data.length === 0" class="bg-muted/20 py-12 border border-dashed rounded-xl text-muted-foreground text-center">
+    <div v-else-if="newsData?.data.length === 0"
+      class="bg-muted/20 py-12 border border-dashed rounded-xl text-muted-foreground text-center">
       <Newspaper class="mx-auto mb-4 w-12 h-12 text-muted-foreground/50" />
       {{ t('newsList.noItems') }}
     </div>
 
     <div v-else class="gap-6 grid md:grid-cols-2">
-      <Card 
-        v-for="item in newsData?.data" 
-        :key="item.id" 
-        class="group flex flex-col hover:shadow-md hover:border-brand-neon transition-all duration-200 cursor-pointer"
-      >
+      <Card v-for="item in newsData?.data" :key="item.id"
+        class="group flex flex-col hover:shadow-md hover:border-brand-neon transition-all duration-200 cursor-pointer">
         <CardHeader class="pb-3">
           <div class="flex justify-between items-start gap-4 mb-2">
             <Badge variant="secondary" class="font-normal">{{ item.category }}</Badge>

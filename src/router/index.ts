@@ -68,26 +68,21 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to) => {
   const authStore = useAuthStore();
 
   if (to.meta.requiresAuth) {
     if (!authStore.isAuthenticated) {
-      // Prova a recuperare l'utente dal token se presente (e.g. reload)
       if (authStore.token) {
         await authStore.fetchMe();
         if (authStore.isAuthenticated) {
-          next();
-          return;
+          return true;
         }
       }
-      next({ name: 'login' });
-    } else {
-      next();
+      return { name: 'login' };
     }
-  } else {
-    next();
   }
+  return true;
 });
 
 export default router;

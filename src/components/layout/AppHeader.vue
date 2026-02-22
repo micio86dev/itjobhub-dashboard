@@ -7,12 +7,12 @@
         <span class="font-medium text-foreground capitalize">{{ currentRouteName }}</span>
       </div>
     </div>
-    
+
     <div class="flex items-center gap-4 ml-auto">
       <!-- Language Selector -->
       <DropdownMenu>
         <DropdownMenuTrigger as-child>
-          <Button variant="ghost" size="icon" aria-label="Cambia Lingua">
+          <Button variant="ghost" size="icon" :aria-label="t('layout.header.changeLanguage')">
             <Globe class="w-[1.2rem] h-[1.2rem]" />
           </Button>
         </DropdownMenuTrigger>
@@ -34,7 +34,7 @@
           <Button variant="ghost" class="relative rounded-full w-8 h-8">
             <Avatar class="w-8 h-8">
               <AvatarImage :src="authStore.user?.avatar || ''" :alt="authStore.userName" />
-              <AvatarFallback>{{ authStore.user?.first_name?.[0] || 'U' }}</AvatarFallback>
+              <AvatarFallback>{{ authStore.user?.firstName?.[0] || 'U' }}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -49,12 +49,12 @@
           <DropdownMenuItem>
             <!-- TODO: Profile page route -->
             <UserIcon class="mr-2 w-4 h-4" />
-            <span>{{ t('profilo', 'Profilo') }}</span>
+            <span>{{ t('layout.header.profile') }}</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem @click="handleLogout" class="text-destructive">
             <LogOut class="mr-2 w-4 h-4" />
-            <span>{{ t('logout', 'Logout') }}</span>
+            <span>{{ t('layout.header.logout') }}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

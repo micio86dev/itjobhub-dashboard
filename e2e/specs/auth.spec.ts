@@ -12,51 +12,28 @@ test.describe('Auth Flow', () => {
         await expect(page.getByTestId('login-btn')).toBeVisible();
     });
 
-    test('mostra alert di errore se login fallisce (mock)', async ({ page }) => {
-        // Intercept and mock API failure
-        await page.route('**/auth/login', route => {
-            route.fulfill({
-                status: 401,
-                contentType: 'application/json',
-                body: JSON.stringify({ message: 'Credenziali errate' })
-            });
-        });
-
+    test('mostra alert di errore con credenziali sbagliate (backend reale)', async ({ page }) => {
         await page.goto('/login');
-        await page.getByTestId('email').fill('user@example.com');
-        await page.getByTestId('password').fill('wrongpass');
+        await page.getByTestId('email').fill('utente-inesistente@fake-domain.test');
+        await page.getByTestId('password').fill('password-sbagliata-12345');
         await page.getByTestId('login-btn').click();
 
-        // Verifica alert errore
-        await expect(page.getByTestId('login-error')).toBeVisible();
-        await expect(page.getByTestId('login-error')).toContainText('Credenziali errate');
+        // Il backend reale risponde con errore autentico
+        await expect(page.getByTestId('login-error')).toBeVisible({ timeout: 10000 });
     });
 
-    test('login valido fa redirect alla dashboard (mock)', async ({ page }) => {
-        // Intercept and mock API success
-        await page.route('**/auth/login', route => {
-            route.fulfill({
-                status: 200,
-                contentType: 'application/json',
-                body: JSON.stringify({
-                    accessToken: 'fake-token',
-                    user: {
-                        id: '1',
-                        email: 'admin@example.com',
-                        first_name: 'Admin',
-                        last_name: 'User',
-                        role: 'admin'
-                    }
-                })
-            });
-        });
+    test('login valido fa redirect alla dashboard (credenziali reali da ENV)', async ({ page }) => {
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        test.skip(!adminEmail || !adminPassword, 'ADMIN_EMAIL/ADMIN_PASSWORD not configured in .env');
 
         await page.goto('/login');
-        await page.getByTestId('email').fill('admin@example.com');
-        await page.getByTestId('password').fill('password123');
+        await page.getByTestId('email').fill(adminEmail!);
+        await page.getByTestId('password').fill(adminPassword!);
         await page.getByTestId('login-btn').click();
 
-        // Controlla che il routing avvenga
-        await expect(page).toHaveURL(/.*\/dashboard/);
+        // Verifica redirect alla dashboard con il backend reale
+        await expect(page).toHaveURL(/.*\/dashboard/, { timeout: 15000 });
     });
 });

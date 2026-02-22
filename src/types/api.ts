@@ -25,8 +25,8 @@ export interface LocationGeo {
 export interface User {
     id: string;
     email: string;
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     oauth_provider?: string;
     oauth_id?: string;

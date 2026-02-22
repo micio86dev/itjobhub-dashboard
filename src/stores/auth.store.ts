@@ -19,20 +19,19 @@ export const useAuthStore = defineStore('auth', {
     }),
     getters: {
         isAuthenticated: (state) => !!state.token && !!state.user,
-        userName: (state) => (state.user ? `${state.user.first_name} ${state.user.last_name}` : ''),
+        userName: (state) => (state.user ? `${state.user.firstName} ${state.user.lastName}` : ''),
     },
     actions: {
         async login(email: string, password: string): Promise<void> {
             this.loading = true;
             this.error = null;
             try {
-                const responseData = await apiFetch<{ accessToken?: string, token?: string, user: User }>('/auth/login', {
+                const { data: responseData } = await apiFetch<{ data: { accessToken?: string, token?: string, user: User } }>('/auth/login', {
                     method: 'POST',
                     body: { email, password },
                 });
 
-                // Supponendo che il server risponda con { accessToken: string, user: User }
-                this.token = responseData.accessToken || responseData.token || null;
+                this.token = responseData.token || null;
                 this.user = responseData.user;
                 Cookies.set('admin-token', this.token as string, { expires: 7 });
             } catch (err: unknown) {
@@ -60,7 +59,8 @@ export const useAuthStore = defineStore('auth', {
             if (!this.token) return;
             this.loading = true;
             try {
-                this.user = await apiFetch<User>('/users/me');
+                const response = await apiFetch<{ data: User }>('/users/me');
+                this.user = response?.data || null;
             } catch {
                 this.token = null;
                 this.user = null;

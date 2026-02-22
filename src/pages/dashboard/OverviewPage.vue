@@ -13,94 +13,57 @@
 
     <!-- ROW 1: StatCards -->
     <div class="gap-6 grid md:grid-cols-2 lg:grid-cols-4">
-      <StatCard
-        :title="t('overview.users.title')"
-        :value="overviewData?.users ?? 0"
-        :icon="Users"
-        :trend="overviewData?.usersChange ?? 0"
-        :trend-label="t('overview.users.change')"
-        :loading="isOverviewLoading"
-      />
-      <StatCard
-        :title="t('overview.jobs.title')"
-        :value="overviewData?.jobs ?? 0"
-        :icon="Briefcase"
-        :trend="overviewData?.jobsChange ?? 0"
-        :trend-label="t('overview.jobs.change')"
-        :loading="isOverviewLoading"
-      />
-      <StatCard
-        :title="t('overview.companies.title')"
-        :value="overviewData?.companies ?? 0"
-        :icon="Building2"
-        :loading="isOverviewLoading"
-      />
-      <StatCard
-        :title="t('overview.news.title')"
-        :value="overviewData?.news ?? 0"
-        :icon="Newspaper"
-        :loading="isOverviewLoading"
-      />
+      <StatCard :title="t('overview.users.title')" :value="overviewData?.users ?? 0" :icon="Users"
+        :trend="overviewData?.usersChange ?? 0" :trend-label="t('overview.users.change')"
+        :loading="isOverviewLoading" />
+      <StatCard :title="t('overview.jobs.title')" :value="overviewData?.jobs ?? 0" :icon="Briefcase"
+        :trend="overviewData?.jobsChange ?? 0" :trend-label="t('overview.jobs.change')" :loading="isOverviewLoading" />
+      <StatCard :title="t('overview.companies.title')" :value="overviewData?.companies ?? 0" :icon="Building2"
+        :loading="isOverviewLoading" />
+      <StatCard :title="t('overview.news.title')" :value="overviewData?.news ?? 0" :icon="Newspaper"
+        :loading="isOverviewLoading" />
     </div>
     <Alert v-if="isOverviewError" variant="destructive">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Statistiche generali non elaborabili.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="overviewRefetch">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
 
     <!-- ROW 2: Charts -->
     <div class="gap-6 grid md:grid-cols-2">
-      <LineChart
-        :title="t('overview.charts.registrations')"
-        :series="[{ name: 'Registrazioni', data: registrationsData?.map(d => d.count) || [] }]"
-        :x-labels="registrationsData?.map(d => d.date) || []"
-        :loading="isRegistrationsLoading"
-      />
-      <BarChart
-        :title="t('overview.charts.jobsPerWeek')"
+      <LineChart :title="t('overview.charts.registrations')"
+        :series="[{ name: t('overview.charts.registrations'), data: registrationsData?.map(d => d.count) || [] }]"
+        :x-labels="registrationsData?.map(d => d.date) || []" :loading="isRegistrationsLoading" />
+      <BarChart :title="t('overview.charts.jobsPerWeek')"
         :data="jobsTimelineData?.map(d => ({ label: d.week, value: d.count })) || []"
-        :loading="isJobsTimelineLoading"
-      />
+        :loading="isJobsTimelineLoading" />
     </div>
 
     <!-- ROW 3: Mixed -->
     <div class="gap-6 grid md:grid-cols-3">
-      <DonutChart
-        :title="t('overview.charts.loginMethods')"
+      <DonutChart :title="t('overview.charts.loginMethods')"
         :data="loginMethodsData?.map(d => ({ name: d.method, value: d.count })) || []"
-        :loading="isLoginMethodsLoading"
-      />
-      <TopList
-        :title="t('overview.charts.topSkills')"
-        :items="topSkillsData?.map(d => ({ label: d.skill, count: d.count })) || []"
-        :loading="isTopSkillsLoading"
-      />
-      <TopList
-        :title="t('overview.charts.topLanguages')"
+        :loading="isLoginMethodsLoading" />
+      <TopList :title="t('overview.charts.topSkills')"
+        :items="topSkillsData?.map(d => ({ label: d.skill, count: d.count })) || []" :loading="isTopSkillsLoading" />
+      <TopList :title="t('overview.charts.topLanguages')"
         :items="topLanguagesData?.map(d => ({ label: d.language, count: d.count })) || []"
-        :loading="isTopLanguagesLoading"
-      />
+        :loading="isTopLanguagesLoading" />
     </div>
 
     <!-- ROW 4: DataTables -->
     <div class="gap-6 grid lg:grid-cols-2">
       <div class="space-y-4">
         <h3 class="font-semibold text-xl">{{ t('overview.tables.latestJobs') }}</h3>
-        <DataTable
-          :columns="(jobsColumns as any)"
-          :data="(latestJobsData?.data as any) || []"
-          :loading="isLatestJobsLoading"
-        />
+        <DataTable :columns="(jobsColumns as any)" :data="(latestJobsData?.data as any) || []"
+          :loading="isLatestJobsLoading" />
       </div>
       <div class="space-y-4">
         <h3 class="font-semibold text-xl">{{ t('overview.tables.latestUsers') }}</h3>
-        <DataTable
-          :columns="(usersColumns as any)"
-          :data="(latestUsersData?.data as any) || []"
-          :loading="isLatestUsersLoading"
-        />
+        <DataTable :columns="(usersColumns as any)" :data="(latestUsersData?.data as any) || []"
+          :loading="isLatestUsersLoading" />
       </div>
     </div>
 
@@ -108,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { ColumnDef } from '@tanstack/vue-table'
@@ -192,16 +155,16 @@ const refreshAll = async () => {
 }
 
 // Columns definition for simple summary tables
-const jobsColumns: ColumnDef<Job, unknown>[] = [
-  { accessorKey: 'title', header: 'Titolo' },
-  { accessorKey: 'company.name', header: 'Azienda', cell: ({ row }) => row.original.company?.name || '-' },
-  { accessorKey: 'employment_type', header: 'Tipo' },
-  { accessorKey: 'status', header: 'Status' }
-]
+const jobsColumns = computed<ColumnDef<Job, unknown>[]>(() => [
+  { accessorKey: 'title', header: t('jobsList.columns.title') },
+  { accessorKey: 'company.name', header: t('companies.title'), cell: ({ row }) => row.original.company?.name || '-' },
+  { accessorKey: 'employment_type', header: t('jobsList.columns.type') },
+  { accessorKey: 'status', header: t('jobsList.columns.status') }
+])
 
-const usersColumns: ColumnDef<User, unknown>[] = [
-  { accessorKey: 'first_name', header: 'Nome', cell: ({ row }) => `${row.original.first_name} ${row.original.last_name}` },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'role', header: 'Metodo' },
-]
+const usersColumns = computed<ColumnDef<User, unknown>[]>(() => [
+  { accessorKey: 'firstName', header: t('users.columns.user'), cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}` },
+  { accessorKey: 'email', header: t('users.columns.email') },
+  { accessorKey: 'role', header: t('users.columns.method') },
+])
 </script>

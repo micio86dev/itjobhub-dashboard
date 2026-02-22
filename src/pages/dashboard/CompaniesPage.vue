@@ -1,23 +1,19 @@
 <template>
   <div class="space-y-6">
     <div class="flex justify-between items-center">
-       <h2 class="font-bold text-3xl tracking-tight">{{ t('companies.title') }}</h2>
-       <Button>
-         <Plus class="mr-2 w-4 h-4" />
-         {{ t('companies.addCompany') }}
-       </Button>
+      <h2 class="font-bold text-3xl tracking-tight">{{ t('companies.title') }}</h2>
+      <Button>
+        <Plus class="mr-2 w-4 h-4" />
+        {{ t('companies.addCompany') }}
+      </Button>
     </div>
 
     <!-- Filters -->
     <div class="flex sm:flex-row flex-col gap-4">
       <div class="relative w-full sm:max-w-xs">
         <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input
-          v-model="filters.search"
-          :placeholder="t('companies.searchPlaceholder')"
-          class="pl-9"
-          @input="handleSearch"
-        />
+        <Input v-model="filters.search" :placeholder="t('companies.searchPlaceholder')" class="pl-9"
+          @input="handleSearch" />
       </div>
     </div>
 
@@ -25,7 +21,7 @@
     <Alert v-if="isError" variant="destructive">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Impossibile caricare le aziende.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
@@ -45,17 +41,14 @@
         </CardContent>
       </Card>
     </div>
-    
+
     <div v-else-if="companiesData?.data.length === 0" class="py-10 text-muted-foreground text-center">
       {{ t('companies.noItems') }}
     </div>
 
     <div v-else class="gap-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <Card 
-        v-for="company in companiesData?.data" 
-        :key="company.id"
-        class="group flex flex-col hover:border-brand-neon transition-colors duration-200"
-      >
+      <Card v-for="company in companiesData?.data" :key="company.id"
+        class="group flex flex-col hover:border-brand-neon transition-colors duration-200">
         <CardHeader class="flex-row items-center gap-4">
           <Avatar class="bg-white border w-12 h-12 text-zinc-800">
             <AvatarImage :src="company.logo_url || ''" :alt="company.name" />
@@ -69,16 +62,11 @@
         <CardContent class="flex-1 space-y-2 text-muted-foreground text-sm">
         </CardContent>
         <CardFooter class="pt-2">
-          <a 
-            v-if="company.website" 
-            :href="company.website" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 font-medium hover:text-brand-neon text-sm hover:underline"
-          >
+          <a v-if="company.website" :href="company.website" target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 font-medium hover:text-brand-neon text-sm hover:underline">
             <LinkIcon class="w-3 h-3" /> {{ t('companies.website') }}
           </a>
-          <span v-else class="text-muted-foreground text-sm italic">{{ t('companies.noData') || 'Sito web assente' }}</span>
+          <span v-else class="text-muted-foreground text-sm italic">{{ t('users.details.noData') }}</span>
         </CardFooter>
       </Card>
     </div>

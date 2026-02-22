@@ -10,25 +10,18 @@
     <Alert v-if="isError" variant="destructive" class="mb-6">
       <AlertTitle>{{ t('overview.error') }}</AlertTitle>
       <AlertDescription class="flex justify-between items-center">
-        <span>Impossibile caricare le offerte dalla mappa.</span>
+        <span>{{ t('overview.error') }}</span>
         <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
       </AlertDescription>
     </Alert>
 
     <div class="flex lg:flex-row flex-col flex-1 gap-6 min-h-0">
       <div class="flex flex-col w-full lg:w-80 h-full min-h-0 overflow-y-auto shrink-0">
-        <MapFilters
-          :result-count="jobsData?.total || 0"
-          @update:filters="handleFilterUpdate"
-        />
+        <MapFilters :result-count="jobsData?.total || 0" @update:filters="handleFilterUpdate" />
       </div>
-      
+
       <div class="flex-1 bg-muted/20 border rounded-xl min-h-[500px] lg:min-h-0 overflow-hidden">
-        <JobsMap
-          :jobs="(jobsData?.data as any) || []"
-          :filters="filters"
-          :loading="isLoading"
-        />
+        <JobsMap :jobs="(jobsData?.data as any) || []" :filters="filters" :loading="isLoading" />
       </div>
     </div>
   </div>
