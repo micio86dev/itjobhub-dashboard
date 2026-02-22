@@ -1,17 +1,35 @@
-import { apiFetch } from '@/services/api.client'
-import type { PaginatedResponse, Company } from '@/types/api'
+import { companiesApi } from '@/api'
+import type { Company } from '@/api'
 
-export const companiesService = {
-    async getCompanies(params?: Record<string, unknown>): Promise<PaginatedResponse<Company>> {
-        const query = new URLSearchParams()
-        if (params) {
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== null) {
-                    query.append(key, String(params[key]))
-                }
-            })
-        }
-
-        return await apiFetch<PaginatedResponse<Company>>(`/companies?${query.toString()}`)
-    }
+export interface GetCompaniesParams {
+  page?: number
+  limit?: number
+  search?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
 }
+
+export interface PaginatedCompanies {
+  items: Company[]
+  total: number
+  page: number
+  pages: number
+}
+
+async function getCompanies(params: GetCompaniesParams = {}): Promise<PaginatedCompanies> {
+  const res = await companiesApi.getCompanies(params)
+  const { companies, pagination } = res.data
+  return {
+    items: companies,
+    total: pagination.total,
+    page: pagination.page,
+    pages: pagination.pages,
+  }
+}
+
+async function getCompany(id: string): Promise<Company> {
+  const res = await companiesApi.getCompany(id)
+  return res.data
+}
+
+export const companiesService = { getCompanies, getCompany }

@@ -1,22 +1,37 @@
-import { apiFetch } from '@/services/api.client'
-import type { PaginatedResponse, Job } from '@/types/api'
+import { jobsApi } from '@/api'
+import type { JobListItem, Job } from '@/api'
+import type { GetJobsParams } from '@/api/jobs'
 
-export const jobsService = {
-    async getJobs(params?: Record<string, unknown>): Promise<PaginatedResponse<Job>> {
-        try {
-            const sp = new URLSearchParams()
-            if (params) {
-                Object.entries(params).forEach(([k, v]) => {
-                    if (v !== undefined && v !== null && v !== '') {
-                        sp.append(k, String(v))
-                    }
-                })
-            }
-            const res = await apiFetch<PaginatedResponse<Job>>(`/jobs?${sp.toString()}`)
-            return res
-        } catch {
-            // Return empty if API fails
-            return { data: [], total: 0, page: 1, limit: 10, totalPages: 0 }
-        }
-    }
+export interface PaginatedJobs {
+  items: JobListItem[]
+  total: number
+  page: number
+  pages: number
 }
+
+async function getJobs(params: GetJobsParams = {}): Promise<PaginatedJobs> {
+  const res = await jobsApi.getJobs(params)
+  const { jobs, pagination } = res.data
+  return {
+    items: jobs,
+    total: pagination.total,
+    page: pagination.page,
+    pages: pagination.pages,
+  }
+}
+
+async function getJob(id: string): Promise<Job> {
+  const res = await jobsApi.getJob(id)
+  return res.data
+}
+
+async function getJobsWithLocation(limit = 500): Promise<JobListItem[]> {
+  const res = await jobsApi.getJobs({ limit, status: 'active' })
+  return res.data.jobs.filter((j) => j.location_geo !== null)
+}
+
+async function deleteJob(id: string): Promise<void> {
+  await jobsApi.deleteJob(id)
+}
+
+export const jobsService = { getJobs, getJob, getJobsWithLocation, deleteJob }

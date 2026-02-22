@@ -1,44 +1,48 @@
-import { ref, readonly, watch } from 'vue';
-import Cookies from 'js-cookie';
+import { shallowRef, watch, readonly } from 'vue'
+import Cookies from 'js-cookie'
 
-const mode = ref<'light' | 'dark' | 'system'>('system');
+type Theme = 'light' | 'dark'
+const COOKIE_KEY = 'admin-theme'
 
-function initTheme() {
-    const saved = Cookies.get('admin-theme') as 'light' | 'dark' | 'system' | undefined;
-    if (saved) {
-        mode.value = saved;
-    } else {
-        // defaults to system, maybe read media query
-        const prefersDark = typeof window !== 'undefined' && window.matchMedia
-            ? window.matchMedia('(prefers-color-scheme: dark)').matches
-            : false;
-        mode.value = prefersDark ? 'dark' : 'light';
-    }
+// Singleton state — shared across all component instances
+const _theme = shallowRef<Theme>(resolveInitialTheme())
+
+function resolveInitialTheme(): Theme {
+  const saved = Cookies.get(COOKIE_KEY) as Theme | undefined
+  if (saved === 'light' || saved === 'dark') return saved
+  if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark'
+  return 'light'
 }
 
-if (typeof window !== 'undefined') {
-    initTheme();
+function applyTheme(theme: Theme) {
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
 }
 
-watch(mode, (newMode) => {
-    if (typeof document !== 'undefined') {
-        if (newMode === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    }
-    Cookies.set('admin-theme', newMode, { expires: 365 });
-}, { immediate: true });
+// Apply immediately on module load
+applyTheme(_theme.value)
+
+// Watch singleton for changes
+watch(_theme, (next) => {
+  applyTheme(next)
+  Cookies.set(COOKIE_KEY, next, { expires: 365 })
+})
 
 export function useTheme() {
-    const toggleTheme = () => {
-        mode.value = mode.value === 'dark' ? 'light' : 'dark';
-    };
+  function toggleTheme() {
+    _theme.value = _theme.value === 'light' ? 'dark' : 'light'
+  }
 
-    return {
-        theme: readonly(mode),
-        toggleTheme,
-        setMode: (m: 'light' | 'dark' | 'system') => { mode.value = m; }
-    };
+  function setTheme(t: Theme) {
+    _theme.value = t
+  }
+
+  return {
+    theme: readonly(_theme),
+    toggleTheme,
+    setTheme,
+  }
 }

@@ -1,303 +1,244 @@
-<template>
-  <div class="space-y-4 w-full" data-testid="data-table">
-    <!-- Toolbar -->
-    <div class="flex flex-wrap justify-between items-center gap-4">
-      <div class="flex flex-1 items-center gap-2 min-w-[200px]">
-        <div v-if="searchable" class="relative w-full max-w-sm">
-          <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-          <Input 
-            v-model="globalFilter" 
-            placeholder="Cerca..." 
-            class="pl-9"
-            data-testid="search-input"
-          />
-        </div>
-        <slot name="toolbar-actions" />
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Selected count -->
-        <div v-if="selectedCount > 0" class="mr-2 text-muted-foreground text-sm">
-          {{ selectedCount }} selezionat{{ selectedCount === 1 ? 'o' : 'i' }}
-        </div>
-        <!-- Export CSV -->
-        <Button 
-          v-if="exportable" 
-          variant="outline" 
-          size="sm" 
-          @click="exportCSV"
-          data-testid="export-csv"
-        >
-          <Download class="mr-2 w-4 h-4" />
-          Esporta CSV
-        </Button>
-      </div>
-    </div>
-
-    <!-- Table -->
-    <div class="border rounded-md">
-      <Table>
-        <TableHeader>
-          <TableRow 
-            v-for="headerGroup in table.getHeaderGroups()" 
-            :key="headerGroup.id"
-          >
-            <TableHead 
-              v-for="header in headerGroup.headers" 
-              :key="header.id"
-              :class="{ 'cursor-pointer select-none': header.column.getCanSort() }"
-              @click="header.column.getToggleSortingHandler()?.($event)"
-              :data-testid="header.column.getCanSort() ? `sort-${header.column.id}` : undefined"
-            >
-              <div class="flex items-center gap-1">
-                <FlexRender 
-                  v-if="!header.isPlaceholder" 
-                  :render="header.column.columnDef.header" 
-                  :props="header.getContext()" 
-                />
-                <template v-if="header.column.getCanSort()">
-                  <ArrowDown v-if="header.column.getIsSorted() === 'desc'" class="w-4 h-4" />
-                  <ArrowUp v-else-if="header.column.getIsSorted() === 'asc'" class="w-4 h-4" />
-                  <ArrowUpDown v-else class="w-4 h-4 text-muted-foreground" />
-                </template>
-              </div>
-            </TableHead>
-            <TableHead v-if="$slots['row-actions']" class="w-[80px]"></TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          <template v-if="loading">
-            <TableRow v-for="i in 5" :key="i" class="animate-pulse">
-              <TableCell v-for="(col, index) in columns" :key="col.id || index">
-                <Skeleton class="rounded w-full h-5" />
-              </TableCell>
-              <TableCell v-if="$slots['row-actions']">
-                <Skeleton class="rounded w-8 h-8" />
-              </TableCell>
-            </TableRow>
-          </template>
-
-          <template v-else-if="table.getRowModel().rows?.length">
-            <TableRow 
-              v-for="(row, index) in table.getRowModel().rows" 
-              :key="row.id"
-              :data-state="row.getIsSelected() ? 'selected' : undefined"
-              :data-testid="`row-${index}`"
-            >
-              <TableCell 
-                v-for="cell in row.getVisibleCells()" 
-                :key="cell.id"
-              >
-                <FlexRender 
-                  :render="cell.column.columnDef.cell" 
-                  :props="cell.getContext()" 
-                />
-              </TableCell>
-              <!-- Row Actions Slot -->
-              <TableCell v-if="$slots['row-actions']" class="text-right">
-                <slot name="row-actions" :row="row.original" />
-              </TableCell>
-            </TableRow>
-          </template>
-
-          <template v-else>
-            <TableRow>
-              <TableCell 
-                :colspan="columns.length + ($slots['row-actions'] ? 1 : 0)" 
-                class="h-48 text-center"
-                data-testid="empty-state"
-              >
-                <div class="flex flex-col justify-center items-center text-muted-foreground">
-                  <Inbox class="opacity-20 mb-2 w-10 h-10" />
-                  <p>Nessun risultato</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          </template>
-        </TableBody>
-      </Table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex justify-between items-center" v-if="totalRows !== undefined || table.getPageCount() > 1">
-      <div class="text-muted-foreground text-sm">
-        {{ paginationText }}
-      </div>
-      <div class="flex items-center space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.setPageIndex(0)"
-          :disabled="!table.getCanPreviousPage()"
-        >
-          <ChevronsLeft class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.previousPage()"
-          :disabled="!table.getCanPreviousPage()"
-          data-testid="page-prev"
-        >
-          <ChevronLeft class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.nextPage()"
-          :disabled="!table.getCanNextPage()"
-          data-testid="page-next"
-        >
-          <ChevronRight class="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          @click="table.setPageIndex(table.getPageCount() - 1)"
-          :disabled="!table.getCanNextPage()"
-        >
-          <ChevronsRight class="w-4 h-4" />
-        </Button>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script setup lang="ts" generic="T extends Record<string, unknown>">
-import { ref, computed } from 'vue'
+<script setup lang="ts" generic="T extends object">
+import { shallowRef, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   useVueTable,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   getFilteredRowModel,
-  FlexRender
+  getPaginationRowModel,
+  type ColumnDef,
+  type SortingState,
 } from '@tanstack/vue-table'
-import type { 
-  ColumnDef, 
-  SortingState
-} from '@tanstack/vue-table'
+import { ChevronUp, ChevronDown, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Download } from 'lucide-vue-next'
+import { FlexRender } from '@tanstack/vue-table'
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+const props = withDefaults(
+  defineProps<{
+    columns: ColumnDef<T>[]
+    data: T[]
+    loading?: boolean
+    totalRows?: number
+    pageSize?: number
+    searchable?: boolean
+    exportable?: boolean
+  }>(),
+  { loading: false, pageSize: 25, searchable: true, exportable: false },
+)
 
-import {
-  Search,
-  Download,
-  ArrowUpDown,
-  ArrowDown,
-  ArrowUp,
-  Inbox,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight
-} from 'lucide-vue-next'
+const { t } = useI18n()
 
-const props = withDefaults(defineProps<{
-  columns: ColumnDef<T, unknown>[]
-  data: T[]
-  loading?: boolean
-  totalRows?: number
-  pageSize?: number
-  searchable?: boolean
-  exportable?: boolean
-}>(), {
-  loading: false,
-  pageSize: 25,
-  searchable: false,
-  exportable: false,
-})
+const globalFilter = shallowRef('')
+const sorting = shallowRef<SortingState>([])
+const rowSelection = shallowRef<Record<string, boolean>>({})
 
-const sorting = ref<SortingState>([])
-const globalFilter = ref('')
-const rowSelection = ref({})
-
-// Costruiamo la tabella
 const table = useVueTable({
   get data() { return props.data },
   get columns() { return props.columns },
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
   state: {
     get sorting() { return sorting.value },
     get globalFilter() { return globalFilter.value },
     get rowSelection() { return rowSelection.value },
+    get pagination() { return { pageIndex: 0, pageSize: props.pageSize } },
   },
-  onSortingChange: updaterOrValue => {
-    sorting.value = typeof updaterOrValue === 'function' ? updaterOrValue(sorting.value) : updaterOrValue
+  onSortingChange: (updater) => {
+    sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater
   },
-  onGlobalFilterChange: updaterOrValue => {
-    globalFilter.value = typeof updaterOrValue === 'function' ? updaterOrValue(globalFilter.value) : updaterOrValue
+  onGlobalFilterChange: (val: string) => {
+    globalFilter.value = val
   },
-  onRowSelectionChange: updaterOrValue => {
-    rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue
+  enableRowSelection: true,
+  onRowSelectionChange: (updater) => {
+    rowSelection.value = typeof updater === 'function' ? updater(rowSelection.value) : updater
   },
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  initialState: {
-    pagination: {
-      pageSize: props.pageSize
-    }
-  }
 })
 
 const selectedCount = computed(() => Object.keys(rowSelection.value).length)
 
-const paginationText = computed(() => {
-  const pageIndex = table.getState().pagination.pageIndex
-  const pageSize = table.getState().pagination.pageSize
-  
-  if (props.totalRows !== undefined) {
-    const start = pageIndex * pageSize + 1
-    const end = Math.min((pageIndex + 1) * pageSize, props.totalRows)
-    return `${start}-${end} di ${props.totalRows}`
-  } else {
-    const total = table.getFilteredRowModel().rows.length
-    if (total === 0) return ''
-    const start = pageIndex * pageSize + 1
-    const end = Math.min((pageIndex + 1) * pageSize, total)
-    return `${start}-${end} di ${total}`
-  }
-})
-
-const exportCSV = () => {
+function exportCsv() {
   const rows = table.getFilteredRowModel().rows
-  if (rows.length === 0) return
+  const headers = props.columns
+    .map((col) => (typeof col.header === 'string' ? col.header : String(col.id ?? '')))
+    .join(',')
 
-  // Estrae gli header
-  const visibleColumns = table.getVisibleLeafColumns()
-  const headers = visibleColumns.map(col => typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id)
-  
-  // Estrae i dati
-  const csvRows = rows.map(row => {
-    return visibleColumns.map(col => {
-      const val = row.getValue(col.id)
-      return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : String(val ?? '')
-    }).join(',')
-  })
+  const lines = rows.map((row) =>
+    row.getAllCells().map((cell) => {
+      const val = cell.getValue()
+      const str = val === null || val === undefined ? '' : String(val)
+      return `"${str.replace(/"/g, '""')}"`
+    }).join(','),
+  )
 
-  // Assembla il CSV
-  const csvContent = [headers.join(','), ...csvRows].join('\n')
-  
-  // Scarica il file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const csv = [headers, ...lines].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
   const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.setAttribute('href', url)
-  link.setAttribute('download', `export_${new Date().toISOString().split('T')[0]}.csv`)
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'export.csv'
+  a.click()
+  URL.revokeObjectURL(url)
 }
+
+// Reset page when data or filter changes
+watch(() => props.data, () => { table.setPageIndex(0) })
+watch(globalFilter, () => { table.setPageIndex(0) })
 </script>
+
+<template>
+  <div data-testid="data-table" class="dt">
+
+    <!-- Toolbar -->
+    <div class="dt-toolbar">
+      <input
+        v-if="searchable"
+        v-model="globalFilter"
+        data-testid="search-input"
+        type="text"
+        :placeholder="t('table.search')"
+        class="dt-search"
+      />
+      <slot name="toolbar-actions" />
+      <button
+        v-if="exportable"
+        data-testid="export-csv"
+        class="dt-export-btn"
+        @click="exportCsv"
+      >
+        <Download class="h-4 w-4" />
+        {{ $t('common.export') }}
+      </button>
+      <span v-if="selectedCount > 0" class="dt-selection-count">
+        {{ t('table.selected', { n: selectedCount }) }}
+      </span>
+    </div>
+
+    <!-- Table -->
+    <div class="dt-table-wrap">
+      <table class="dt-table">
+        <thead>
+          <tr class="dt-head-row">
+            <th
+              v-for="header in table.getFlatHeaders()"
+              :key="header.id"
+              class="dt-th"
+              :class="{ 'is-sortable': header.column.getCanSort() }"
+              :data-testid="`sort-${header.id}`"
+              @click="header.column.getToggleSortingHandler()?.($event)"
+            >
+              <div class="dt-th-inner">
+                <FlexRender
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
+                <ChevronUp v-if="header.column.getIsSorted() === 'asc'" class="h-3 w-3" />
+                <ChevronDown v-if="header.column.getIsSorted() === 'desc'" class="h-3 w-3" />
+              </div>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <!-- Skeleton rows -->
+          <template v-if="loading">
+            <tr v-for="i in 5" :key="i" class="dt-skeleton-row">
+              <td v-for="col in columns" :key="String(col.id)" class="dt-td">
+                <div class="dt-skeleton-cell" />
+              </td>
+            </tr>
+          </template>
+
+          <!-- Empty state -->
+          <tr v-else-if="table.getRowModel().rows.length === 0">
+            <td :colspan="columns.length">
+              <div data-testid="empty-state" class="dt-empty">
+                <p>{{ $t('table.emptyState') }}</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data rows -->
+          <template v-else>
+            <tr
+              v-for="(row, idx) in table.getRowModel().rows"
+              :key="row.id"
+              :data-testid="`row-${idx}`"
+              class="dt-row"
+            >
+              <td
+                v-for="cell in row.getVisibleCells()"
+                :key="cell.id"
+                class="dt-td"
+              >
+                <FlexRender
+                  :render="cell.column.columnDef.cell"
+                  :props="cell.getContext()"
+                />
+              </td>
+              <td v-if="$slots['row-actions']" class="dt-td">
+                <slot name="row-actions" :row="row.original" />
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="dt-pagination">
+      <span class="dt-pagination-total">
+        {{ table.getFilteredRowModel().rows.length.toLocaleString() }} {{ $t('common.total') }}
+      </span>
+
+      <div class="dt-pagination-controls">
+        <button
+          class="dt-pagination-btn"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.setPageIndex(0)"
+        >
+          <ChevronsLeft class="h-4 w-4" />
+        </button>
+        <button
+          data-testid="page-prev"
+          class="dt-pagination-btn"
+          :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()"
+        >
+          <ChevronLeft class="h-4 w-4" />
+        </button>
+
+        <span class="dt-pagination-page">
+          {{ table.getState().pagination.pageIndex + 1 }} / {{ table.getPageCount() || 1 }}
+        </span>
+
+        <button
+          data-testid="page-next"
+          class="dt-pagination-btn"
+          :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()"
+        >
+          <ChevronRight class="h-4 w-4" />
+        </button>
+        <button
+          class="dt-pagination-btn"
+          :disabled="!table.getCanNextPage()"
+          @click="table.setPageIndex(table.getPageCount() - 1)"
+        >
+          <ChevronsRight class="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<style scoped>
+.dt-th-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+</style>

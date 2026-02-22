@@ -1,17 +1,33 @@
-import { apiFetch } from '@/services/api.client'
-import type { PaginatedResponse, User } from '@/types/api'
+import { getUsers as apiGetUsers } from '@/api/users'
+import type { UserListItem } from '@/api'
 
-export const usersService = {
-    async getUsers(params?: Record<string, unknown>): Promise<PaginatedResponse<User>> {
-        const query = new URLSearchParams()
-        if (params) {
-            Object.keys(params).forEach(key => {
-                if (params[key] !== undefined && params[key] !== null) {
-                    query.append(key, String(params[key]))
-                }
-            })
-        }
-
-        return await apiFetch<PaginatedResponse<User>>(`/users?${query.toString()}`)
-    }
+export interface GetUsersParams {
+  page?: number
+  limit?: number
+  search?: string
+  role?: string
 }
+
+export interface PaginatedUsers {
+  items: UserListItem[]
+  total: number
+  page: number
+  pages: number
+}
+
+async function getUsers(params: GetUsersParams = {}): Promise<PaginatedUsers> {
+  const res = await apiGetUsers({
+    page: params.page,
+    limit: params.limit,
+    role: params.role,
+    q: params.search,
+  })
+  return {
+    items: res.data.users,
+    total: res.data.pagination.total,
+    page: res.data.pagination.page,
+    pages: res.data.pagination.pages,
+  }
+}
+
+export const usersService = { getUsers }

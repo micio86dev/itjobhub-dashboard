@@ -1,55 +1,109 @@
+<script setup lang="ts">
+import { shallowRef, reactive } from 'vue'
+import { useQuery } from '@tanstack/vue-query'
+import JobsMap from '@/components/organisms/JobsMap.vue'
+import MapFilters from '@/components/organisms/MapFilters.vue'
+import type { MapFiltersState } from '@/components/organisms/MapFilters.vue'
+import { jobsService } from '@/services/jobs.service'
+
+const { data: jobs, isPending } = useQuery({
+  queryKey: ['jobs-with-location'],
+  queryFn: () => jobsService.getJobsWithLocation(),
+})
+
+const filters = reactive<MapFiltersState>({
+  skills: [],
+  remote: null,
+  company: null,
+  contractType: null,
+  experienceLevel: null,
+  publishedWithin: null,
+})
+
+const mapRef = shallowRef<InstanceType<typeof JobsMap> | null>(null)
+
+function onFiltersUpdate(f: MapFiltersState) {
+  Object.assign(filters, f)
+}
+</script>
+
 <template>
-  <div class="flex flex-col h-[calc(100vh-10rem)]">
-    <div class="flex justify-between items-end mb-6">
-      <div>
-        <h2 class="font-bold text-3xl tracking-tight">{{ t('jobsMap.title') }}</h2>
-        <p class="text-muted-foreground">{{ t('jobsMap.subtitle') }}</p>
+  <div class="map-page">
+
+    <!-- Sidebar filtri -->
+    <aside class="map-sidebar">
+      <div class="map-sidebar-header">
+        <h2 class="map-sidebar-title">{{ $t('map.title') }}</h2>
       </div>
+      <MapFilters
+        :jobs-count="mapRef?.filteredCount ?? (jobs?.length ?? 0)"
+        @update:filters="onFiltersUpdate"
+      />
+    </aside>
+
+    <!-- Map -->
+    <div class="map-panel">
+      <div v-if="isPending" class="map-loading">
+        <p class="map-loading-text">{{ $t('common.loading') }}</p>
+      </div>
+      <JobsMap
+        v-else
+        ref="mapRef"
+        :jobs="jobs ?? []"
+        :filters="filters"
+      />
     </div>
 
-    <Alert v-if="isError" variant="destructive" class="mb-6">
-      <AlertTitle>{{ t('overview.error') }}</AlertTitle>
-      <AlertDescription class="flex justify-between items-center">
-        <span>{{ t('overview.error') }}</span>
-        <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
-      </AlertDescription>
-    </Alert>
-
-    <div class="flex lg:flex-row flex-col flex-1 gap-6 min-h-0">
-      <div class="flex flex-col w-full lg:w-80 h-full min-h-0 overflow-y-auto shrink-0">
-        <MapFilters :result-count="jobsData?.total || 0" @update:filters="handleFilterUpdate" />
-      </div>
-
-      <div class="flex-1 bg-muted/20 border rounded-xl min-h-[500px] lg:min-h-0 overflow-hidden">
-        <JobsMap :jobs="(jobsData?.data as any) || []" :filters="filters" :loading="isLoading" />
-      </div>
-    </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery } from '@tanstack/vue-query'
-
-import { jobsService } from '@/services/jobs.service'
-
-import JobsMap from '@/components/organisms/JobsMap.vue'
-import MapFilters from '@/components/organisms/MapFilters.vue'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-
-const { t } = useI18n()
-
-const filters = ref<Record<string, unknown>>({})
-
-const { data: jobsData, isLoading, isError, refetch } = useQuery({
-  queryKey: ['jobsMap', filters],
-  queryFn: () => jobsService.getJobs(filters.value),
-  staleTime: 5 * 60 * 1000
-})
-
-const handleFilterUpdate = (newFilters: Record<string, unknown>) => {
-  filters.value = { ...newFilters }
+<style scoped>
+.map-page {
+  display: flex;
+  height: calc(100vh - 7rem);
+  gap: 1rem;
 }
-</script>
+
+.map-sidebar {
+  display: none;
+  width: 20rem;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-radius: var(--r-card);
+  border: 1px solid var(--c-border);
+  background-color: var(--c-surface);
+}
+
+@media (min-width: 1024px) {
+  .map-sidebar { display: block; }
+}
+
+.map-sidebar-header {
+  border-bottom: 1px solid var(--c-border);
+  padding: 1rem;
+}
+
+.map-sidebar-title {
+  font-weight: 600;
+  color: var(--c-text-base);
+}
+
+.map-panel {
+  flex: 1;
+  overflow: hidden;
+  border-radius: var(--r-card);
+}
+
+.map-loading {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-card);
+  background-color: var(--c-surface-raised);
+}
+
+.map-loading-text {
+  color: var(--c-text-muted);
+}
+</style>

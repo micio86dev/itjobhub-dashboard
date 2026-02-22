@@ -1,0 +1,14 @@
+/* ============================================================
+   Base — body defaults and global element resets
+   ============================================================ */
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--c-surface-app);
+    color: var(--c-text-base);
+  }
+}

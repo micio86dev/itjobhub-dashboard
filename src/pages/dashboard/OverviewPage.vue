@@ -1,170 +1,179 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { RefreshCw, Users, Briefcase, Building2, Newspaper } from 'lucide-vue-next'
+import { format, type Locale } from 'date-fns'
+import { it, enUS, fr, es, de } from 'date-fns/locale'
+import StatCard from '@/components/organisms/StatCard.vue'
+import TopList from '@/components/organisms/TopList.vue'
+import LineChart from '@/components/organisms/charts/LineChart.vue'
+import BarChart from '@/components/organisms/charts/BarChart.vue'
+import DonutChart from '@/components/organisms/charts/DonutChart.vue'
+import DataTable from '@/components/organisms/DataTable.vue'
+import { analyticsService } from '@/services/analytics.service'
+import { jobsService } from '@/services/jobs.service'
+import { usersService } from '@/services/users.service'
+import type { ColumnDef } from '@tanstack/vue-table'
+import type { JobListItem, UserListItem } from '@/api'
+
+const { t, locale } = useI18n()
+const qc = useQueryClient()
+
+const dateLocales: Record<string, Locale> = { it, en: enUS, fr, es, de }
+
+const now = computed(() =>
+  format(new Date(), 'PPpp', { locale: dateLocales[locale.value] ?? enUS }),
+)
+
+const statsQ = useQuery({ queryKey: ['overview-stats'], queryFn: analyticsService.getOverviewStats })
+const regTimelineQ = useQuery({ queryKey: ['reg-timeline'], queryFn: () => analyticsService.getRegistrationsTimeline(30) })
+const jobsTimelineQ = useQuery({ queryKey: ['jobs-timeline'], queryFn: () => analyticsService.getJobsTimeline(8) })
+const loginMethodsQ = useQuery({ queryKey: ['login-methods'], queryFn: analyticsService.getLoginMethodsDistribution })
+const topSkillsQ = useQuery({ queryKey: ['top-skills'], queryFn: () => analyticsService.getTopSkills(10) })
+const topLangsQ = useQuery({ queryKey: ['top-langs'], queryFn: () => analyticsService.getTopLanguages(10) })
+const latestJobsQ = useQuery({ queryKey: ['latest-jobs'], queryFn: () => jobsService.getJobs({ limit: 10, sortBy: 'created_at', sortOrder: 'desc' }) })
+const latestUsersQ = useQuery({ queryKey: ['latest-users'], queryFn: () => usersService.getUsers({ limit: 10 }) })
+
+const regChartSeries = computed(() => [{
+  name: t('overview.totalUsers'),
+  data: regTimelineQ.data.value?.map((p) => p.count) ?? [],
+}])
+const regChartLabels = computed(() => regTimelineQ.data.value?.map((p) => p.date.slice(5)) ?? [])
+
+const jobsChartData = computed(() =>
+  (jobsTimelineQ.data.value ?? []).map((p) => ({ label: p.date, value: p.count })),
+)
+
+const loginMethodsData = computed(() =>
+  (loginMethodsQ.data.value ?? []).map((m) => ({ name: m.method, value: m.count })),
+)
+
+const topSkillsItems = computed(() =>
+  (topSkillsQ.data.value ?? []).map((s) => ({ label: s.skill, count: s.count })),
+)
+
+const topLangsItems = computed(() =>
+  (topLangsQ.data.value ?? []).map((s) => ({ label: s.skill, count: s.count })),
+)
+
+const jobColumns: ColumnDef<JobListItem>[] = [
+  { id: 'title', accessorKey: 'title', header: t('jobs.jobTitle') },
+  { id: 'company', accessorFn: (r) => r.company?.name ?? '-', header: t('jobs.company') },
+  { id: 'workMode', accessorKey: 'workMode', header: t('jobs.type') },
+  { id: 'created_at', accessorFn: (r) => r.created_at?.slice(0, 10) ?? '-', header: t('jobs.publishedAt') },
+  { id: 'status', accessorKey: 'status', header: t('jobs.status') },
+]
+
+const userColumns: ColumnDef<UserListItem>[] = [
+  { id: 'name', accessorFn: (r) => `${r.firstName ?? ''} ${r.lastName ?? ''}`.trim() || '-', header: t('users.name') },
+  { id: 'email', accessorKey: 'email', header: t('users.email') },
+  { id: 'role', accessorKey: 'role', header: t('users.role') },
+]
+
+function refreshAll() { qc.invalidateQueries() }
+</script>
+
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
+  <div class="page-stack">
+
+    <!-- Header -->
+    <div class="page-header-row">
       <div>
-        <h2 class="font-bold text-3xl tracking-tight">{{ t('overview.title') }}</h2>
-        <p class="text-muted-foreground">{{ t('overview.updatedAt') }}: {{ new Date().toLocaleString() }}</p>
+        <h1 class="page-title">{{ $t('overview.title') }}</h1>
+        <p class="page-subtitle">{{ $t('overview.subtitle') }} {{ now }}</p>
       </div>
-      <Button @click="refreshAll" :disabled="isRefreshing">
-        <RefreshCw class="mr-2 w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
-        {{ t('overview.refresh') }}
-      </Button>
+      <button class="btn-outline" @click="refreshAll">
+        <RefreshCw class="h-4 w-4" />
+        {{ $t('common.refresh') }}
+      </button>
     </div>
 
-    <!-- ROW 1: StatCards -->
-    <div class="gap-6 grid md:grid-cols-2 lg:grid-cols-4">
-      <StatCard :title="t('overview.users.title')" :value="overviewData?.users ?? 0" :icon="Users"
-        :trend="overviewData?.usersChange ?? 0" :trend-label="t('overview.users.change')"
-        :loading="isOverviewLoading" />
-      <StatCard :title="t('overview.jobs.title')" :value="overviewData?.jobs ?? 0" :icon="Briefcase"
-        :trend="overviewData?.jobsChange ?? 0" :trend-label="t('overview.jobs.change')" :loading="isOverviewLoading" />
-      <StatCard :title="t('overview.companies.title')" :value="overviewData?.companies ?? 0" :icon="Building2"
-        :loading="isOverviewLoading" />
-      <StatCard :title="t('overview.news.title')" :value="overviewData?.news ?? 0" :icon="Newspaper"
-        :loading="isOverviewLoading" />
-    </div>
-    <Alert v-if="isOverviewError" variant="destructive">
-      <AlertTitle>{{ t('overview.error') }}</AlertTitle>
-      <AlertDescription class="flex justify-between items-center">
-        <span>{{ t('overview.error') }}</span>
-        <Button variant="outline" size="sm" @click="overviewRefetch">{{ t('overview.retry') }}</Button>
-      </AlertDescription>
-    </Alert>
-
-    <!-- ROW 2: Charts -->
-    <div class="gap-6 grid md:grid-cols-2">
-      <LineChart :title="t('overview.charts.registrations')"
-        :series="[{ name: t('overview.charts.registrations'), data: registrationsData?.map(d => d.count) || [] }]"
-        :x-labels="registrationsData?.map(d => d.date) || []" :loading="isRegistrationsLoading" />
-      <BarChart :title="t('overview.charts.jobsPerWeek')"
-        :data="jobsTimelineData?.map(d => ({ label: d.week, value: d.count })) || []"
-        :loading="isJobsTimelineLoading" />
+    <!-- ROW 1 — Stat cards -->
+    <div class="stats-grid">
+      <StatCard :title="$t('overview.totalUsers')" :value="statsQ.data.value?.users ?? 0" :change="statsQ.data.value?.usersChange" :icon="Users" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.activeJobs')" :value="statsQ.data.value?.jobs ?? 0" :change="statsQ.data.value?.jobsChange" :icon="Briefcase" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.companies')" :value="statsQ.data.value?.companies ?? 0" :icon="Building2" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.news')" :value="statsQ.data.value?.news ?? 0" :icon="Newspaper" :loading="statsQ.isPending.value" />
     </div>
 
-    <!-- ROW 3: Mixed -->
-    <div class="gap-6 grid md:grid-cols-3">
-      <DonutChart :title="t('overview.charts.loginMethods')"
-        :data="loginMethodsData?.map(d => ({ name: d.method, value: d.count })) || []"
-        :loading="isLoginMethodsLoading" />
-      <TopList :title="t('overview.charts.topSkills')"
-        :items="topSkillsData?.map(d => ({ label: d.skill, count: d.count })) || []" :loading="isTopSkillsLoading" />
-      <TopList :title="t('overview.charts.topLanguages')"
-        :items="topLanguagesData?.map(d => ({ label: d.language, count: d.count })) || []"
-        :loading="isTopLanguagesLoading" />
+    <!-- ROW 2 — Charts 2-col -->
+    <div class="grid-2col">
+      <LineChart :title="$t('overview.registrationsChart')" :series="regChartSeries" :x-labels="regChartLabels" :loading="regTimelineQ.isPending.value" />
+      <BarChart :title="$t('overview.jobsWeeklyChart')" :data="jobsChartData" :loading="jobsTimelineQ.isPending.value" />
     </div>
 
-    <!-- ROW 4: DataTables -->
-    <div class="gap-6 grid lg:grid-cols-2">
-      <div class="space-y-4">
-        <h3 class="font-semibold text-xl">{{ t('overview.tables.latestJobs') }}</h3>
-        <DataTable :columns="(jobsColumns as any)" :data="(latestJobsData?.data as any) || []"
-          :loading="isLatestJobsLoading" />
+    <!-- ROW 3 — Donut + top lists 3-col -->
+    <div class="grid-3col">
+      <DonutChart :title="$t('overview.loginMethods')" :data="loginMethodsData" :loading="loginMethodsQ.isPending.value" />
+      <TopList :title="$t('overview.topSkills')" :items="topSkillsItems" :loading="topSkillsQ.isPending.value" />
+      <TopList :title="$t('overview.topLanguages')" :items="topLangsItems" :loading="topLangsQ.isPending.value" />
+    </div>
+
+    <!-- ROW 4 — Mini tables 2-col -->
+    <div class="grid-2col">
+      <div>
+        <h2 class="section-heading">{{ $t('overview.latestJobs') }}</h2>
+        <DataTable :columns="jobColumns" :data="latestJobsQ.data.value?.items ?? []" :loading="latestJobsQ.isPending.value" :searchable="false" :page-size="10" />
       </div>
-      <div class="space-y-4">
-        <h3 class="font-semibold text-xl">{{ t('overview.tables.latestUsers') }}</h3>
-        <DataTable :columns="(usersColumns as any)" :data="(latestUsersData?.data as any) || []"
-          :loading="isLatestUsersLoading" />
+      <div>
+        <h2 class="section-heading">{{ $t('overview.latestUsers') }}</h2>
+        <DataTable :columns="userColumns" :data="latestUsersQ.data.value?.items ?? []" :loading="latestUsersQ.isPending.value" :searchable="false" :page-size="10" />
       </div>
     </div>
 
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import type { ColumnDef } from '@tanstack/vue-table'
-
-import { Button } from '@/components/ui/button'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { RefreshCw, Users, Briefcase, Building2, Newspaper } from 'lucide-vue-next'
-
-import StatCard from '@/components/organisms/StatCard.vue'
-import LineChart from '@/components/organisms/charts/LineChart.vue'
-import BarChart from '@/components/organisms/charts/BarChart.vue'
-import DonutChart from '@/components/organisms/charts/DonutChart.vue'
-import TopList from '@/components/organisms/TopList.vue'
-import DataTable from '@/components/organisms/DataTable.vue'
-
-import { analyticsService } from '@/services/analytics.service'
-import { jobsService } from '@/services/jobs.service'
-import { usersService } from '@/services/users.service'
-
-import type { Job, User } from '@/types/api'
-
-const { t } = useI18n()
-const queryClient = useQueryClient()
-const isRefreshing = ref(false)
-
-const staleTime = 5 * 60 * 1000 // 5 minuti
-
-// Queries
-const { data: overviewData, isLoading: isOverviewLoading, isError: isOverviewError, refetch: overviewRefetch } = useQuery({
-  queryKey: ['overviewStats'],
-  queryFn: () => analyticsService.getOverviewStats(),
-  staleTime
-})
-
-const { data: registrationsData, isLoading: isRegistrationsLoading } = useQuery({
-  queryKey: ['registrationsTimeline'],
-  queryFn: () => analyticsService.getRegistrationsTimeline(30),
-  staleTime
-})
-
-const { data: jobsTimelineData, isLoading: isJobsTimelineLoading } = useQuery({
-  queryKey: ['jobsTimeline'],
-  queryFn: () => analyticsService.getJobsTimeline(8),
-  staleTime
-})
-
-const { data: loginMethodsData, isLoading: isLoginMethodsLoading } = useQuery({
-  queryKey: ['loginMethods'],
-  queryFn: () => analyticsService.getLoginMethodsDistribution(),
-  staleTime
-})
-
-const { data: topSkillsData, isLoading: isTopSkillsLoading } = useQuery({
-  queryKey: ['topSkills'],
-  queryFn: () => analyticsService.getTopSkills(10),
-  staleTime
-})
-
-const { data: topLanguagesData, isLoading: isTopLanguagesLoading } = useQuery({
-  queryKey: ['topLanguages'],
-  queryFn: () => analyticsService.getTopLanguages(10),
-  staleTime
-})
-
-const { data: latestJobsData, isLoading: isLatestJobsLoading } = useQuery({
-  queryKey: ['latestJobs'],
-  queryFn: () => jobsService.getJobs({ limit: 10 }),
-  staleTime
-})
-
-const { data: latestUsersData, isLoading: isLatestUsersLoading } = useQuery({
-  queryKey: ['latestUsers'],
-  queryFn: () => usersService.getUsers({ limit: 10 }),
-  staleTime
-})
-
-const refreshAll = async () => {
-  isRefreshing.value = true
-  await queryClient.invalidateQueries()
-  isRefreshing.value = false
+<style scoped>
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-// Columns definition for simple summary tables
-const jobsColumns = computed<ColumnDef<Job, unknown>[]>(() => [
-  { accessorKey: 'title', header: t('jobsList.columns.title') },
-  { accessorKey: 'company.name', header: t('companies.title'), cell: ({ row }) => row.original.company?.name || '-' },
-  { accessorKey: 'employment_type', header: t('jobsList.columns.type') },
-  { accessorKey: 'status', header: t('jobsList.columns.status') }
-])
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-const usersColumns = computed<ColumnDef<User, unknown>[]>(() => [
-  { accessorKey: 'firstName', header: t('users.columns.user'), cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}` },
-  { accessorKey: 'email', header: t('users.columns.email') },
-  { accessorKey: 'role', header: t('users.columns.method') },
-])
-</script>
+.page-subtitle {
+  margin-top: 0.125rem;
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+}
+
+/* ── Responsive grids ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.grid-2col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.grid-3col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .grid-2col { grid-template-columns: repeat(2, 1fr); }
+  .grid-3col { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .grid-2col  { grid-template-columns: repeat(2, 1fr); }
+}
+</style>

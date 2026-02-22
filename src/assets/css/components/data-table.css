@@ -1,0 +1,190 @@
+/* ============================================================
+   DataTable — table container, head, rows, pagination
+   ============================================================ */
+
+@layer components {
+  /* ── Outer container ── */
+  .dt {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--r-card);
+    border: 1px solid var(--c-border);
+    background-color: var(--c-surface);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  /* ── Toolbar (search + actions) ── */
+  .dt-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    border-bottom: 1px solid var(--c-border);
+    padding: var(--sp-3);
+  }
+
+  /* ── Search input inside toolbar ── */
+  .dt-search {
+    flex: 1;
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border-input);
+    background-color: var(--c-surface-muted);
+    padding: var(--sp-1\.5) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-base);
+    transition: border-color 150ms ease;
+
+    &::placeholder { color: var(--c-text-subtle); }
+    &:focus {
+      outline: none;
+      border-color: var(--c-primary);
+    }
+  }
+
+  /* ── Export button in toolbar ── */
+  .dt-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1\.5);
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border-input);
+    padding: var(--sp-1\.5) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-secondary);
+    background-color: transparent;
+    transition: var(--transition-colors);
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover { background-color: var(--c-surface-muted); }
+  }
+
+  /* ── Selection count ── */
+  .dt-selection-count {
+    font-size: var(--text-sm);
+    color: var(--c-text-muted);
+  }
+
+  /* ── Table scroll wrapper ── */
+  .dt-table-wrap {
+    overflow-x: auto;
+  }
+
+  /* ── Table element ── */
+  .dt-table {
+    width: 100%;
+    font-size: var(--text-sm);
+    border-collapse: collapse;
+  }
+
+  /* ── Header row ── */
+  .dt-head-row {
+    border-bottom: 1px solid var(--c-border-muted);
+    background-color: var(--c-surface-muted);
+  }
+
+  /* ── Header cell ── */
+  .dt-th {
+    padding: var(--sp-3) var(--sp-4);
+    text-align: left;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--c-text-muted);
+
+    &.is-sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+  }
+
+  /* ── Body row ── */
+  .dt-row {
+    border-bottom: 1px solid var(--c-border-muted);
+    transition: background-color 100ms ease;
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--c-surface-muted) 50%, transparent);
+    }
+  }
+
+  /* ── Skeleton row ── */
+  .dt-skeleton-row {
+    border-bottom: 1px solid var(--c-border-muted);
+  }
+
+  /* ── Body cell ── */
+  .dt-td {
+    padding: var(--sp-3) var(--sp-4);
+    color: var(--c-text-secondary);
+  }
+
+  /* ── Skeleton cell content ── */
+  .dt-skeleton-cell {
+    height: 1rem;
+    width: 100%;
+    border-radius: var(--r-sm);
+    background-color: var(--c-surface-raised);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* ── Empty state ── */
+  .dt-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-4) 4rem;
+    text-align: center;
+    color: var(--c-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* ── Pagination bar ── */
+  .dt-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--c-border-muted);
+    padding: var(--sp-3) var(--sp-4);
+  }
+
+  .dt-pagination-total {
+    font-size: var(--text-sm);
+    color: var(--c-text-muted);
+  }
+
+  .dt-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+  }
+
+  .dt-pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-sm);
+    padding: var(--sp-1);
+    color: var(--c-text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition-colors);
+
+    &:hover:not(:disabled) { background-color: var(--c-surface-raised); }
+    &:disabled { opacity: 0.3; cursor: default; }
+  }
+
+  .dt-pagination-page {
+    padding-inline: var(--sp-2);
+    font-size: var(--text-sm);
+    color: var(--c-text-secondary);
+  }
+
+  /* ── Pulse keyframe ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
+}

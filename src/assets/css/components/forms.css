@@ -1,0 +1,145 @@
+/* ============================================================
+   Forms — inputs, labels, selects, error messages
+   ============================================================ */
+
+@layer components {
+  .form-field {
+    margin-bottom: var(--sp-4);
+  }
+
+  .form-field-last {
+    margin-bottom: var(--sp-6);
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: var(--sp-1\.5);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--c-text-secondary);
+  }
+
+  .form-label-xs {
+    display: block;
+    margin-bottom: var(--sp-1\.5);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: var(--c-text-muted);
+  }
+
+  /* ── Text input ── */
+  .form-input {
+    width: 100%;
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border-input);
+    background-color: var(--c-surface);
+    padding-block: var(--sp-2\.5);
+    padding-inline: var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-base);
+    transition: border-color 150ms ease;
+
+    &::placeholder {
+      color: var(--c-text-subtle);
+    }
+    &:focus {
+      outline: none;
+      border-color: var(--c-primary);
+    }
+    &.is-error {
+      border-color: var(--c-danger-border-input);
+      &:focus { border-color: var(--c-danger-focus); }
+    }
+  }
+
+  /* Input with left icon padding */
+  .form-input-icon-left {
+    padding-left: 2.5rem; /* pl-10 */
+  }
+  .form-input-icon-right {
+    padding-right: 2.5rem; /* pr-10 */
+  }
+
+  /* ── Select ── */
+  .form-select {
+    width: 100%;
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border-input);
+    background-color: var(--c-surface);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-secondary);
+    transition: border-color 150ms ease;
+
+    &:focus {
+      outline: none;
+      border-color: var(--c-primary);
+    }
+  }
+
+  /* ── Error message ── */
+  .form-error {
+    margin-top: var(--sp-1);
+    font-size: var(--text-xs);
+    color: var(--c-danger);
+  }
+
+  /* ── Error alert box (login) ── */
+  .form-error-box {
+    margin-bottom: var(--sp-4);
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-danger-border);
+    background-color: var(--c-danger-surface);
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--text-sm);
+    color: var(--c-danger-text);
+  }
+
+  /* ── Field icon wrapper ── */
+  .field-icon-wrap {
+    position: relative;
+  }
+
+  .field-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--c-text-subtle);
+    pointer-events: none;
+  }
+
+  .field-icon-right {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--c-text-subtle);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+
+    &:hover { color: var(--c-text-secondary); }
+  }
+
+  /* ── Quick search (compact, max-width) ── */
+  .form-search {
+    max-width: 20rem;
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border-input);
+    background-color: var(--c-surface);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-base);
+    transition: border-color 150ms ease;
+
+    &::placeholder { color: var(--c-text-subtle); }
+    &:focus {
+      outline: none;
+      border-color: var(--c-primary);
+    }
+  }
+}
