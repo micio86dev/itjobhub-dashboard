@@ -93,11 +93,11 @@ const columns: ColumnDef<Contact>[] = [
             const unreplied = r.replies.filter((rep) => !rep.read_by_sender).length
             return unreplied > 0 ? `${unreplied}` : '-'
         },
-        header: t('messages.unread_replies'),
+        header: t('messages.unreadReplies'),
     },
     {
         id: 'status',
-        accessorFn: (r) => (r.is_sender_logged_in ? t('messages.registered_user') : t('messages.anonymous')),
+        accessorFn: (r) => (r.is_sender_logged_in ? t('messages.registeredUser') : t('messages.anonymous')),
         header: t('messages.status'),
     },
 ]
@@ -153,7 +153,7 @@ const handleCloseDetail = () => {
             <!-- Contacts List -->
             <div class="contacts-list-section">
                 <div v-if="contactsQ.isError.value" class="error-box">
-                    {{ (contactsQ.error.value as Error)?.message || $t('messages.error_loading') }}
+                    {{ (contactsQ.error.value as Error)?.message || $t('messages.errorLoading') }}
                 </div>
 
                 <DataTable :columns="columns" :data="contactsQ.data.value?.data ?? []"
@@ -163,14 +163,14 @@ const handleCloseDetail = () => {
                 <!-- Pagination -->
                 <div v-if="contactsQ.data.value?.pagination" class="pagination-controls">
                     <button :disabled="page <= 1" @click="page--" class="btn-pagination">
-                        {{ $t('common.previous') }}
+                        {{ $t('table.prev') }}
                     </button>
                     <span class="pagination-info">
-                        {{ $t('common.page') }} {{ page }} / {{ contactsQ.data.value?.pagination?.pages ?? 1 }}
+                        {{ $t('table.page') }} {{ page }} / {{ contactsQ.data.value?.pagination?.pages ?? 1 }}
                     </span>
                     <button :disabled="page >= (contactsQ.data.value?.pagination?.pages ?? 1)" @click="page++"
                         class="btn-pagination">
-                        {{ $t('common.next') }}
+                        {{ $t('table.next') }}
                     </button>
                 </div>
             </div>
@@ -197,7 +197,7 @@ const handleCloseDetail = () => {
                             <span class="badge-status">
                                 {{
                                     selectedContact.is_sender_logged_in
-                                        ? $t('messages.registered_user')
+                                        ? $t('messages.registeredUser')
                                         : $t('messages.anonymous')
                                 }}
                             </span>
@@ -213,7 +213,7 @@ const handleCloseDetail = () => {
 
                     <!-- Original Message -->
                     <div class="message-box">
-                        <h3 class="message-label">{{ $t('messages.original_message') }}</h3>
+                        <h3 class="message-label">{{ $t('messages.originalMessage') }}</h3>
                         <p class="message-content">{{ selectedContact.message }}</p>
                     </div>
 
@@ -257,7 +257,7 @@ const handleCloseDetail = () => {
                             <div class="form-actions">
                                 <button @click="handleSendReply" :disabled="isReplying || !replyMessage.trim()"
                                     class="btn-send">
-                                    {{ isReplying ? $t('common.sending') : $t('messages.send') }}
+                                    {{ isReplying ? $t('messages.sending') : $t('messages.send') }}
                                 </button>
                                 <button @click="showReplyForm = false" class="btn-cancel" :disabled="isReplying">
                                     {{ $t('common.cancel') }}

@@ -18,7 +18,7 @@ export default {
     panelSubtitle: 'DevBoards Admin Panel',
   },
   nav: { overview: 'Aperçu', users: 'Utilisateurs', companies: 'Entreprises', jobs: 'Offres',
-    jobsMap: 'Carte Offres', news: 'Actualités', analytics: 'Analytiques', skills: 'Compétences', profile: 'Profil' },
+    jobsMap: 'Carte Offres', news: 'Actualités', analytics: 'Analytiques', skills: 'Compétences', messages: 'Messages', profile: 'Profil' },
   overview: { title: 'Tableau de bord', subtitle: 'Mis à jour le', totalUsers: 'Utilisateurs totaux',
     activeJobs: 'Offres actives', companies: 'Entreprises', news: 'Actualités',
     registrationsChart: 'Nouvelles inscriptions (30j)', jobsWeeklyChart: 'Offres par semaine (8sem)',

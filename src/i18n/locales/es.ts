@@ -18,7 +18,7 @@ export default {
     panelSubtitle: 'DevBoards Admin Panel',
   },
   nav: { overview: 'Resumen', users: 'Usuarios', companies: 'Empresas', jobs: 'Empleos',
-    jobsMap: 'Mapa Empleos', news: 'Noticias', analytics: 'Analíticas', skills: 'Habilidades', profile: 'Perfil' },
+    jobsMap: 'Mapa Empleos', news: 'Noticias', analytics: 'Analíticas', skills: 'Habilidades', messages: 'Mensajes', profile: 'Perfil' },
   overview: { title: 'Panel de Control', subtitle: 'Actualizado el', totalUsers: 'Usuarios totales',
     activeJobs: 'Empleos activos', companies: 'Empresas', news: 'Noticias',
     registrationsChart: 'Nuevos registros (30d)', jobsWeeklyChart: 'Empleos por semana (8sem)',

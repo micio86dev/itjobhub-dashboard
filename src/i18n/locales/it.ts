@@ -51,6 +51,7 @@ export default {
     news: 'News',
     analytics: 'Analytics',
     skills: 'Skills',
+    messages: 'Messaggi',
     profile: 'Profilo',
   },
   overview: {
