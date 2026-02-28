@@ -33,12 +33,25 @@ const queryParams = computed(() => ({
 }))
 
 const contactsQ = useQuery({
-    queryKey: ['contacts', queryParams],
+    queryKey: ['contacts', page, limit],
     queryFn: () => getContacts(queryParams.value),
-    select: (response) => ({
-        data: response.data.data,
-        pagination: response.data.pagination
-    }),
+    select: (response: unknown) => {
+        const payload = response as {
+            data?: Contact[] | { data?: Contact[]; pagination?: { page: number; limit: number; total: number; pages: number } }
+            pagination?: { page: number; limit: number; total: number; pages: number }
+        }
+
+        const data = Array.isArray(payload.data)
+            ? payload.data
+            : (payload.data?.data ?? [])
+
+        const nestedPagination = !Array.isArray(payload.data)
+            ? payload.data?.pagination
+            : undefined
+        const pagination = payload.pagination ?? nestedPagination
+
+        return { data, pagination }
+    },
 })
 
 const columns: ColumnDef<Contact>[] = [
@@ -139,6 +152,10 @@ const handleCloseDetail = () => {
         <div class="content-wrapper">
             <!-- Contacts List -->
             <div class="contacts-list-section">
+                <div v-if="contactsQ.isError.value" class="error-box">
+                    {{ (contactsQ.error.value as Error)?.message || $t('messages.error_loading') }}
+                </div>
+
                 <DataTable :columns="columns" :data="contactsQ.data.value?.data ?? []"
                     :loading="contactsQ.isPending.value" :searchable="false"
                     @row-click="(row: Contact) => handleSelectContact(row)" />
@@ -311,6 +328,15 @@ const handleCloseDetail = () => {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+.error-box {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--c-danger-border, var(--c-border));
+    background-color: var(--c-danger-surface, var(--c-surface-muted));
+    color: var(--c-danger-text, var(--c-text-base));
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
 }
 
 .pagination-controls {
