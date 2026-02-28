@@ -39,6 +39,15 @@
     text-align: center;
   }
 
+  /* ── Chart card wrapper ── */
+  .chart-card {
+    border-radius: var(--r-card);
+    border: 1px solid var(--c-border);
+    background-color: var(--c-chart-bg);
+    padding: var(--sp-4);
+    box-shadow: var(--shadow-card);
+  }
+
   /* ── Stat card value ── */
   .stat-value {
     font-size: var(--text-3xl);

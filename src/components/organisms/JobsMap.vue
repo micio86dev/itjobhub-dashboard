@@ -7,6 +7,7 @@ import type { JobListItem } from '@/api'
 import type { MapFiltersState } from './MapFilters.vue'
 import { useTheme } from '@/composables/useTheme'
 import { subDays, parseISO, isAfter } from 'date-fns'
+import { getCSSVar } from '@/utils/chartColors'
 
 const props = withDefaults(
   defineProps<{
@@ -63,9 +64,9 @@ const filteredJobs = computed(() => {
 defineExpose({ filteredCount: computed(() => filteredJobs.value.length) })
 
 function getMarkerColor(job: JobListItem): string {
-  if (job.workMode === 'remote') return '#22c55e'
-  if (job.workMode === 'hybrid') return '#3b82f6'
-  return '#71717a'
+  if (job.workMode === 'remote') return getCSSVar('--c-primary')
+  if (job.workMode === 'hybrid') return getCSSVar('--c-chart-secondary')
+  return getCSSVar('--c-text-muted')
 }
 
 function rebuildMarkers() {
@@ -103,12 +104,15 @@ function rebuildMarkers() {
     })
 
     marker.addListener('click', () => {
+      const textMuted = getCSSVar('--c-text-muted')
+      const primary = getCSSVar('--c-primary')
+
       const content = `
         <div style="max-width:240px;padding:4px 2px;">
           <strong style="font-size:13px;">${job.title}</strong>
-          <p style="margin:4px 0;font-size:12px;color:#71717a;">${job.company?.name ?? ''}</p>
+          <p style="margin:4px 0;font-size:12px;color:${textMuted};">${job.company?.name ?? ''}</p>
           <p style="margin:4px 0;font-size:11px;">${job.workMode ?? ''} · ${job.contractType ?? ''}</p>
-          ${job.source_url ? `<a href="${job.source_url}" target="_blank" style="font-size:11px;color:#22c55e;">${t('map.viewDetail')} ↗</a>` : ''}
+          ${job.source_url ? `<a href="${job.source_url}" target="_blank" style="font-size:11px;color:${primary};">${t('map.viewDetail')} ↗</a>` : ''}
         </div>
       `
       infoWindow!.setContent(content)
@@ -161,10 +165,14 @@ watch(theme, () => {
 </script>
 
 <template>
-  <div
-    ref="mapRef"
-    data-testid="jobs-map"
-    class="h-full w-full rounded-xl"
-    style="min-height: 400px"
-  />
+  <div ref="mapRef" data-testid="jobs-map" class="jobs-map" />
 </template>
+
+<style scoped>
+.jobs-map {
+  height: 100%;
+  width: 100%;
+  border-radius: var(--r-card);
+  min-height: 400px;
+}
+</style>

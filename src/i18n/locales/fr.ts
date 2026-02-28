@@ -49,6 +49,7 @@ export default {
     toImplement: 'À implémenter côté backend' },
   skills: { title: 'Compétences', topJobSkills: 'Top 30 compétences', topSearchedSkills: 'Top 20 plus recherchées',
     skillsTable: 'Compétence', jobCount: '# Offres', searchCount: '# Recherches', trend: 'Tendance', noSearchData: 'Données indisponibles (TODO)' },
+  messages: { title: 'Messages de Contact', myMessages: 'Mes Messages', from: 'De', email: 'Email', subject: 'Objet', date: 'Date', unreadReplies: 'Réponses Non Lues', status: 'Statut', registeredUser: 'Utilisateur Enregistré', anonymous: 'Anonyme', reply: 'Répondre', replies: 'Réponses', read: 'Lu', unread: 'Non lu', originalMessage: 'Message Original', replyPlaceholder: 'Écris ta réponse...', send: 'Envoyer', answered: 'Répondu', pending: 'En attente', noMessages: 'Aucun message disponible', noRepliesYet: 'Pas encore de réponses', youSent: 'Message envoyé par toi', sentAnonymously: 'Message anonyme', errorLoading: 'Erreur lors du chargement des messages', sending: 'Envoi en cours...' },
   theme: { light: 'Thème clair', dark: 'Thème sombre', toggle: 'Changer thème' },
   language: { it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch' },
   errors: { generic: 'Une erreur est survenue.', notFound: 'Page introuvable', notFoundDesc: 'Cette page n\'existe pas.', backHome: 'Retour accueil', loadFailed: 'Chargement échoué' },

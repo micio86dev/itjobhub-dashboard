@@ -49,6 +49,7 @@ export default {
     toImplement: 'Backend-seitig zu implementieren' },
   skills: { title: 'Fähigkeiten', topJobSkills: 'Top 30 Fähigkeiten', topSearchedSkills: 'Top 20 meistgesuchte',
     skillsTable: 'Fähigkeit', jobCount: '# Jobs', searchCount: '# Suchen', trend: 'Trend', noSearchData: 'Suchdaten nicht verfügbar (TODO)' },
+  messages: { title: 'Kontaktnachrichten', myMessages: 'Meine Nachrichten', from: 'Von', email: 'E-Mail', subject: 'Betreff', date: 'Datum', unreadReplies: 'Ungelesene Antworten', status: 'Status', registeredUser: 'Registrierter Benutzer', anonymous: 'Anonym', reply: 'Antworten', replies: 'Antworten', read: 'Gelesen', unread: 'Ungelesen', originalMessage: 'Ursprüngliche Nachricht', replyPlaceholder: 'Schreibe deine Antwort...', send: 'Senden', answered: 'Beantwortet', pending: 'Ausstehend', noMessages: 'Keine Nachrichten verfügbar', noRepliesYet: 'Noch keine Antworten', youSent: 'Nachricht von dir gesendet', sentAnonymously: 'Anonyme Nachricht', errorLoading: 'Fehler beim Laden von Nachrichten', sending: 'Wird gesendet...' },
   theme: { light: 'Helles Design', dark: 'Dunkles Design', toggle: 'Design wechseln' },
   language: { it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch' },
   errors: { generic: 'Ein Fehler ist aufgetreten.', notFound: 'Seite nicht gefunden', notFoundDesc: 'Diese Seite existiert nicht.', backHome: 'Zur Startseite', loadFailed: 'Laden fehlgeschlagen' },

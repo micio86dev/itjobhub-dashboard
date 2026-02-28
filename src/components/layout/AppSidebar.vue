@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   LayoutDashboard, Users, Building2, Briefcase, Map,
-  Newspaper, BarChart3, Wrench, LogOut,
+  Newspaper, BarChart3, Wrench, LogOut, Mail,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -22,6 +22,7 @@ const navItems = computed(() => [
   { key: 'news', to: '/dashboard/news', icon: Newspaper, label: t('nav.news') },
   { key: 'analytics', to: '/dashboard/analytics', icon: BarChart3, label: t('nav.analytics') },
   { key: 'skills', to: '/dashboard/skills', icon: Wrench, label: t('nav.skills') },
+  { key: 'messages', to: '/dashboard/messages', icon: Mail, label: t('nav.messages') },
 ])
 
 function isActive(item: { to: string; exact?: boolean }) {
@@ -48,12 +49,8 @@ async function handleLogout() {
     <nav class="sidebar-nav">
       <ul class="sidebar-nav-list">
         <li v-for="item in navItems" :key="item.key">
-          <router-link
-            :to="item.to"
-            class="nav-link"
-            :class="{ 'is-active': isActive(item) }"
-          >
-            <component :is="item.icon" class="h-4 w-4" style="flex-shrink:0" />
+          <router-link :to="item.to" class="nav-link" :class="{ 'is-active': isActive(item) }">
+            <component :is="item.icon" class="nav-icon" />
             <span>{{ item.label }}</span>
           </router-link>
         </li>
@@ -82,6 +79,12 @@ async function handleLogout() {
 <style scoped>
 .brand-icon {
   color: var(--c-primary);
+  flex-shrink: 0;
+}
+
+.nav-icon {
+  width: 1rem;
+  height: 1rem;
   flex-shrink: 0;
 }
 

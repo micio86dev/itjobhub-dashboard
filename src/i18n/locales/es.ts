@@ -49,6 +49,7 @@ export default {
     toImplement: 'Por implementar en backend' },
   skills: { title: 'Habilidades', topJobSkills: 'Top 30 habilidades', topSearchedSkills: 'Top 20 más buscadas',
     skillsTable: 'Habilidad', jobCount: '# Empleos', searchCount: '# Búsquedas', trend: 'Tendencia', noSearchData: 'Datos no disponibles (TODO)' },
+  messages: { title: 'Mensajes de Contacto', myMessages: 'Mis Mensajes', from: 'De', email: 'Correo electrónico', subject: 'Asunto', date: 'Fecha', unreadReplies: 'Respuestas No Leídas', status: 'Estado', registeredUser: 'Usuario Registrado', anonymous: 'Anónimo', reply: 'Responder', replies: 'Respuestas', read: 'Lectura', unread: 'No Leído', originalMessage: 'Mensaje Original', replyPlaceholder: 'Escribe tu respuesta...', send: 'Enviar', answered: 'Respondido', pending: 'Pendiente', noMessages: 'Sin mensajes disponibles', noRepliesYet: 'Sin respuestas aún', youSent: 'Mensaje enviado por ti', sentAnonymously: 'Mensaje anónimo', errorLoading: 'Error al cargar los mensajes', sending: 'Enviando...' },
   theme: { light: 'Tema claro', dark: 'Tema oscuro', toggle: 'Cambiar tema' },
   language: { it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch' },
   errors: { generic: 'Se produjo un error.', notFound: 'Página no encontrada', notFoundDesc: 'Esta página no existe.', backHome: 'Volver al inicio', loadFailed: 'Error al cargar datos' },

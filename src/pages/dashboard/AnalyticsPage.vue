@@ -64,13 +64,8 @@ const skillsChartData = computed(() =>
     <div class="analytics-header">
       <h1 class="page-title">{{ $t('analytics.title') }}</h1>
       <div class="period-selector">
-        <button
-          v-for="p in periods"
-          :key="p.value"
-          class="btn-period"
-          :class="{ 'is-active': period === p.value }"
-          @click="period = p.value"
-        >
+        <button v-for="p in periods" :key="p.value" class="btn-period" :class="{ 'is-active': period === p.value }"
+          @click="period = p.value">
           {{ p.label }}
         </button>
       </div>
@@ -80,8 +75,10 @@ const skillsChartData = computed(() =>
     <section>
       <h2 class="section-title">{{ $t('analytics.registrations') }}</h2>
       <div class="grid-2col">
-        <LineChart :title="$t('analytics.dailySessions')" :series="regSeries" :x-labels="regLabels" :loading="regQ.isPending.value" />
-        <BarChart :title="$t('analytics.registrationsByMethod')" :data="loginChartData" :loading="loginMethodsQ.isPending.value" />
+        <LineChart :title="$t('analytics.dailySessions')" :series="regSeries" :x-labels="regLabels"
+          :loading="regQ.isPending.value" />
+        <BarChart :title="$t('analytics.registrationsByMethod')" :data="loginChartData"
+          :loading="loginMethodsQ.isPending.value" />
       </div>
     </section>
 
@@ -104,7 +101,8 @@ const skillsChartData = computed(() =>
     <section>
       <h2 class="section-title">{{ $t('analytics.searches') }}</h2>
       <div class="grid-2col">
-        <BarChart :title="$t('analytics.topKeywords')" :data="skillsChartData" :horizontal="true" :loading="topSkillsQ.isPending.value" />
+        <BarChart :title="$t('analytics.topKeywords')" :data="skillsChartData" :horizontal="true"
+          :loading="topSkillsQ.isPending.value" />
         <div class="card-placeholder">
           <div class="placeholder-inner">
             <Info class="placeholder-icon h-6 w-6" />
@@ -134,16 +132,6 @@ const skillsChartData = computed(() =>
 .period-selector {
   display: flex;
   gap: 0.5rem;
-}
-
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 1024px) {
-  .grid-2col { grid-template-columns: repeat(2, 1fr); }
 }
 
 .placeholder-inner {

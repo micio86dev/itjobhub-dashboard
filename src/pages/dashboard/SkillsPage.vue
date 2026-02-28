@@ -33,7 +33,8 @@ const tableColumns: ColumnDef<SkillStat>[] = [
 
     <!-- Top 30 skills -->
     <div class="grid-2col">
-      <BarChart :title="$t('skills.topJobSkills')" :data="top30Chart" :horizontal="true" :loading="skillsQ.isPending.value" />
+      <BarChart :title="$t('skills.topJobSkills')" :data="top30Chart" :horizontal="true"
+        :loading="skillsQ.isPending.value" />
 
       <div class="card-placeholder">
         <div class="placeholder-inner">
@@ -47,7 +48,8 @@ const tableColumns: ColumnDef<SkillStat>[] = [
     <!-- Skills table -->
     <div>
       <h2 class="section-heading">{{ $t('skills.skillsTable') }}</h2>
-      <DataTable :columns="tableColumns" :data="skillsQ.data.value ?? []" :loading="skillsQ.isPending.value" :exportable="true" :page-size="30" />
+      <DataTable :columns="tableColumns" :data="skillsQ.data.value ?? []" :loading="skillsQ.isPending.value"
+        :exportable="true" :page-size="30" />
     </div>
 
   </div>
@@ -58,16 +60,6 @@ const tableColumns: ColumnDef<SkillStat>[] = [
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}
-
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 1280px) {
-  .grid-2col { grid-template-columns: repeat(2, 1fr); }
 }
 
 .placeholder-inner {

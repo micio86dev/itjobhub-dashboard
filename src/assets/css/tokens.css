@@ -41,6 +41,18 @@
   --c-danger-border-input:var(--color-red-400);
   --c-danger-focus:       var(--color-red-500);
 
+  /* === Chart Colors === */
+  --c-chart-primary:      var(--color-green-500);
+  --c-chart-primary-alt:  var(--color-green-600);
+  --c-chart-secondary:    var(--color-blue-500);
+  --c-chart-accent:       var(--color-amber-500);
+  --c-chart-text:         var(--color-zinc-500);
+  --c-chart-text-muted:   var(--color-zinc-400);
+  --c-chart-text-strong:  var(--color-zinc-700);
+  --c-chart-grid:         var(--color-zinc-200);
+  --c-chart-axis:         var(--color-zinc-300);
+  --c-chart-bg:           var(--c-surface);
+
   /* === Backdrop === */
   --c-backdrop:           rgb(0 0 0 / 0.5);
 
@@ -110,4 +122,11 @@
   --c-danger-text:        var(--color-red-400);
   --c-danger-border:      var(--color-red-800);
   --c-danger-border-input:var(--color-red-600);
+
+  --c-chart-text:         var(--color-zinc-400);
+  --c-chart-text-muted:   var(--color-zinc-500);
+  --c-chart-text-strong:  var(--color-zinc-300);
+  --c-chart-grid:         var(--color-zinc-800);
+  --c-chart-axis:         var(--color-zinc-700);
+  --c-chart-bg:           var(--c-surface);
 }

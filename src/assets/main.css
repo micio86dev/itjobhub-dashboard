@@ -6,6 +6,9 @@
 /* ── Base element defaults ── */
 @import './css/base.css';
 
+/* ── Utility classes ── */
+@import './css/utilities.css';
+
 /* ── Shared component classes ── */
 @import './css/components/buttons.css';
 @import './css/components/forms.css';

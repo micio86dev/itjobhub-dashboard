@@ -82,6 +82,12 @@ const router = createRouter({
           component: () => import('@/pages/dashboard/SkillsPage.vue'),
           meta: { breadcrumb: 'nav.skills' },
         },
+        {
+          path: 'messages',
+          name: 'messages',
+          component: () => import('@/pages/dashboard/MessagesPage.vue'),
+          meta: { breadcrumb: 'nav.messages' },
+        },
       ],
     },
 

@@ -91,21 +91,28 @@ function refreshAll() { qc.invalidateQueries() }
 
     <!-- ROW 1 — Stat cards -->
     <div class="stats-grid">
-      <StatCard :title="$t('overview.totalUsers')" :value="statsQ.data.value?.users ?? 0" :change="statsQ.data.value?.usersChange" :icon="Users" :loading="statsQ.isPending.value" />
-      <StatCard :title="$t('overview.activeJobs')" :value="statsQ.data.value?.jobs ?? 0" :change="statsQ.data.value?.jobsChange" :icon="Briefcase" :loading="statsQ.isPending.value" />
-      <StatCard :title="$t('overview.companies')" :value="statsQ.data.value?.companies ?? 0" :icon="Building2" :loading="statsQ.isPending.value" />
-      <StatCard :title="$t('overview.news')" :value="statsQ.data.value?.news ?? 0" :icon="Newspaper" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.totalUsers')" :value="statsQ.data.value?.users ?? 0"
+        :change="statsQ.data.value?.usersChange" :icon="Users" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.activeJobs')" :value="statsQ.data.value?.jobs ?? 0"
+        :change="statsQ.data.value?.jobsChange" :icon="Briefcase" :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.companies')" :value="statsQ.data.value?.companies ?? 0" :icon="Building2"
+        :loading="statsQ.isPending.value" />
+      <StatCard :title="$t('overview.news')" :value="statsQ.data.value?.news ?? 0" :icon="Newspaper"
+        :loading="statsQ.isPending.value" />
     </div>
 
     <!-- ROW 2 — Charts 2-col -->
     <div class="grid-2col">
-      <LineChart :title="$t('overview.registrationsChart')" :series="regChartSeries" :x-labels="regChartLabels" :loading="regTimelineQ.isPending.value" />
-      <BarChart :title="$t('overview.jobsWeeklyChart')" :data="jobsChartData" :loading="jobsTimelineQ.isPending.value" />
+      <LineChart :title="$t('overview.registrationsChart')" :series="regChartSeries" :x-labels="regChartLabels"
+        :loading="regTimelineQ.isPending.value" />
+      <BarChart :title="$t('overview.jobsWeeklyChart')" :data="jobsChartData"
+        :loading="jobsTimelineQ.isPending.value" />
     </div>
 
     <!-- ROW 3 — Donut + top lists 3-col -->
     <div class="grid-3col">
-      <DonutChart :title="$t('overview.loginMethods')" :data="loginMethodsData" :loading="loginMethodsQ.isPending.value" />
+      <DonutChart :title="$t('overview.loginMethods')" :data="loginMethodsData"
+        :loading="loginMethodsQ.isPending.value" />
       <TopList :title="$t('overview.topSkills')" :items="topSkillsItems" :loading="topSkillsQ.isPending.value" />
       <TopList :title="$t('overview.topLanguages')" :items="topLangsItems" :loading="topLangsQ.isPending.value" />
     </div>
@@ -114,11 +121,13 @@ function refreshAll() { qc.invalidateQueries() }
     <div class="grid-2col">
       <div>
         <h2 class="section-heading">{{ $t('overview.latestJobs') }}</h2>
-        <DataTable :columns="jobColumns" :data="latestJobsQ.data.value?.items ?? []" :loading="latestJobsQ.isPending.value" :searchable="false" :page-size="10" />
+        <DataTable :columns="jobColumns" :data="latestJobsQ.data.value?.items ?? []"
+          :loading="latestJobsQ.isPending.value" :searchable="false" :page-size="10" />
       </div>
       <div>
         <h2 class="section-heading">{{ $t('overview.latestUsers') }}</h2>
-        <DataTable :columns="userColumns" :data="latestUsersQ.data.value?.items ?? []" :loading="latestUsersQ.isPending.value" :searchable="false" :page-size="10" />
+        <DataTable :columns="userColumns" :data="latestUsersQ.data.value?.items ?? []"
+          :loading="latestUsersQ.isPending.value" :searchable="false" :page-size="10" />
       </div>
     </div>
 
@@ -142,38 +151,5 @@ function refreshAll() { qc.invalidateQueries() }
   margin-top: 0.125rem;
   font-size: var(--text-sm);
   color: var(--c-text-muted);
-}
-
-/* ── Responsive grids ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.grid-2col {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.grid-3col {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-@media (min-width: 640px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (min-width: 1024px) {
-  .grid-2col { grid-template-columns: repeat(2, 1fr); }
-  .grid-3col { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (min-width: 1280px) {
-  .stats-grid { grid-template-columns: repeat(4, 1fr); }
-  .grid-2col  { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
