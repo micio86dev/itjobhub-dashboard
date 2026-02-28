@@ -35,7 +35,10 @@ const queryParams = computed(() => ({
 const contactsQ = useQuery({
     queryKey: ['contacts', queryParams],
     queryFn: () => getContacts(queryParams.value),
-    select: (data) => data.data,
+    select: (response) => ({
+        data: response.data.data,
+        pagination: response.data.pagination
+    }),
 })
 
 const columns: ColumnDef<Contact>[] = [
