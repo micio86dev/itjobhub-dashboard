@@ -3,11 +3,11 @@ import { computed } from 'vue'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { PieChart } from 'echarts/charts'
-import { TooltipComponent, LegendComponent } from 'echarts/components'
+import { TooltipComponent, LegendComponent, GraphicComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
 import { getChartColors, getChartPalette } from '@/utils/chartColors'
 
-use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent])
+use([CanvasRenderer, PieChart, TooltipComponent, LegendComponent, GraphicComponent])
 
 interface DonutItem {
   name: string
@@ -40,20 +40,30 @@ const option = computed(() => {
       type: 'pie',
       radius: ['50%', '70%'],
       center: ['50%', '42%'],
-      label: {
-        show: true,
-        position: 'center',
-        formatter: () => `${total.value.toLocaleString()}`,
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: colors.textStrong,
+      label: { show: false },
+      labelLine: { show: false },
+      emphasis: {
+        scale: true,
+        scaleSize: 5,
+        label: { show: false },
       },
-      emphasis: { label: { show: true } },
       data: props.data.map((d, i) => ({
         name: d.name,
         value: d.value,
         itemStyle: { color: palette[i % palette.length] },
       })),
+    }],
+    graphic: [{
+      type: 'text',
+      left: 'center',
+      top: '38%',
+      style: {
+        text: total.value.toLocaleString(),
+        fontSize: 20,
+        fontWeight: 'bold',
+        fill: colors.textStrong,
+        textAlign: 'center',
+      },
     }],
   }
 })

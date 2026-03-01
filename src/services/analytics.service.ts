@@ -29,6 +29,7 @@ interface BackendStats {
     users?: { total?: number; new?: number }
     jobs?: { total?: number; new?: number }
     companies?: { total?: number; new?: number }
+    news?: { total?: number }
   }
 }
 
@@ -39,7 +40,7 @@ async function getOverviewStats(): Promise<OverviewStats> {
     users: d.overview?.users?.total ?? 0,
     jobs: d.overview?.jobs?.total ?? 0,
     companies: d.overview?.companies?.total ?? 0,
-    news: 0,
+    news: d.overview?.news?.total ?? 0,
     usersChange: d.overview?.users?.new ?? 0,
     jobsChange: d.overview?.jobs?.new ?? 0,
   }

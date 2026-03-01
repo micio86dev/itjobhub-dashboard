@@ -5,7 +5,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart as ELineChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import { getChartColors } from '@/utils/chartColors'
+import { getChartColors, addAlpha } from '@/utils/chartColors'
 
 use([CanvasRenderer, ELineChart, GridComponent, TooltipComponent, LegendComponent])
 
@@ -67,12 +67,13 @@ const option = computed(() => {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: colors.primary.replace('rgb', 'rgba').replace(')', ',0.2)') },
-                { offset: 1, color: colors.primary.replace('rgb', 'rgba').replace(')', ',0)') },
+                { offset: 0, color: addAlpha(colors.primary, 0.2) },
+                { offset: 1, color: addAlpha(colors.primary, 0.01) },
               ],
             },
           }
           : undefined,
+      emphasis: { disabled: true },
     })),
   }
 })

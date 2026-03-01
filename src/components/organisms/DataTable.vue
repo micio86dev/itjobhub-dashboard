@@ -35,6 +35,7 @@ const { t } = useI18n()
 const globalFilter = shallowRef('')
 const sorting = shallowRef<SortingState>([])
 const rowSelection = shallowRef<Record<string, boolean>>({})
+const pageIndex = shallowRef(0)
 
 const table = useVueTable({
   get data() { return props.data },
@@ -47,13 +48,18 @@ const table = useVueTable({
     get sorting() { return sorting.value },
     get globalFilter() { return globalFilter.value },
     get rowSelection() { return rowSelection.value },
-    get pagination() { return { pageIndex: 0, pageSize: props.pageSize } },
+    get pagination() { return { pageIndex: pageIndex.value, pageSize: props.pageSize } },
   },
   onSortingChange: (updater) => {
     sorting.value = typeof updater === 'function' ? updater(sorting.value) : updater
   },
   onGlobalFilterChange: (val: string) => {
     globalFilter.value = val
+  },
+  onPaginationChange: (updater) => {
+    const prev = { pageIndex: pageIndex.value, pageSize: props.pageSize }
+    const next = typeof updater === 'function' ? updater(prev) : updater
+    pageIndex.value = next.pageIndex
   },
   enableRowSelection: true,
   onRowSelectionChange: (updater) => {
@@ -88,8 +94,8 @@ function exportCsv() {
 }
 
 // Reset page when data or filter changes
-watch(() => props.data, () => { table.setPageIndex(0) })
-watch(globalFilter, () => { table.setPageIndex(0) })
+watch(() => props.data, () => { pageIndex.value = 0 })
+watch(globalFilter, () => { pageIndex.value = 0 })
 </script>
 
 <template>
@@ -97,21 +103,10 @@ watch(globalFilter, () => { table.setPageIndex(0) })
 
     <!-- Toolbar -->
     <div class="dt-toolbar">
-      <input
-        v-if="searchable"
-        v-model="globalFilter"
-        data-testid="search-input"
-        type="text"
-        :placeholder="t('table.search')"
-        class="dt-search"
-      />
+      <input v-if="searchable" v-model="globalFilter" data-testid="search-input" type="text"
+        :placeholder="t('table.search')" class="dt-search" />
       <slot name="toolbar-actions" />
-      <button
-        v-if="exportable"
-        data-testid="export-csv"
-        class="dt-export-btn"
-        @click="exportCsv"
-      >
+      <button v-if="exportable" data-testid="export-csv" class="dt-export-btn" @click="exportCsv">
         <Download class="h-4 w-4" />
         {{ $t('common.export') }}
       </button>
@@ -125,19 +120,11 @@ watch(globalFilter, () => { table.setPageIndex(0) })
       <table class="dt-table">
         <thead>
           <tr class="dt-head-row">
-            <th
-              v-for="header in table.getFlatHeaders()"
-              :key="header.id"
-              class="dt-th"
-              :class="{ 'is-sortable': header.column.getCanSort() }"
-              :data-testid="`sort-${header.id}`"
-              @click="header.column.getToggleSortingHandler()?.($event)"
-            >
+            <th v-for="header in table.getFlatHeaders()" :key="header.id" class="dt-th"
+              :class="{ 'is-sortable': header.column.getCanSort() }" :data-testid="`sort-${header.id}`"
+              @click="header.column.getToggleSortingHandler()?.($event)">
               <div class="dt-th-inner">
-                <FlexRender
-                  :render="header.column.columnDef.header"
-                  :props="header.getContext()"
-                />
+                <FlexRender :render="header.column.columnDef.header" :props="header.getContext()" />
                 <ChevronUp v-if="header.column.getIsSorted() === 'asc'" class="h-3 w-3" />
                 <ChevronDown v-if="header.column.getIsSorted() === 'desc'" class="h-3 w-3" />
               </div>
@@ -166,22 +153,10 @@ watch(globalFilter, () => { table.setPageIndex(0) })
 
           <!-- Data rows -->
           <template v-else>
-            <tr
-              v-for="(row, idx) in table.getRowModel().rows"
-              :key="row.id"
-              :data-testid="`row-${idx}`"
-              class="dt-row"
-              @click="emit('row-click', row.original)"
-            >
-              <td
-                v-for="cell in row.getVisibleCells()"
-                :key="cell.id"
-                class="dt-td"
-              >
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
+            <tr v-for="(row, idx) in table.getRowModel().rows" :key="row.id" :data-testid="`row-${idx}`" class="dt-row"
+              @click="emit('row-click', row.original)">
+              <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="dt-td">
+                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
               </td>
               <td v-if="$slots['row-actions']" class="dt-td">
                 <slot name="row-actions" :row="row.original" />
@@ -199,19 +174,11 @@ watch(globalFilter, () => { table.setPageIndex(0) })
       </span>
 
       <div class="dt-pagination-controls">
-        <button
-          class="dt-pagination-btn"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.setPageIndex(0)"
-        >
+        <button class="dt-pagination-btn" :disabled="!table.getCanPreviousPage()" @click="table.setPageIndex(0)">
           <ChevronsLeft class="h-4 w-4" />
         </button>
-        <button
-          data-testid="page-prev"
-          class="dt-pagination-btn"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.previousPage()"
-        >
+        <button data-testid="page-prev" class="dt-pagination-btn" :disabled="!table.getCanPreviousPage()"
+          @click="table.previousPage()">
           <ChevronLeft class="h-4 w-4" />
         </button>
 
@@ -219,19 +186,12 @@ watch(globalFilter, () => { table.setPageIndex(0) })
           {{ table.getState().pagination.pageIndex + 1 }} / {{ table.getPageCount() || 1 }}
         </span>
 
-        <button
-          data-testid="page-next"
-          class="dt-pagination-btn"
-          :disabled="!table.getCanNextPage()"
-          @click="table.nextPage()"
-        >
+        <button data-testid="page-next" class="dt-pagination-btn" :disabled="!table.getCanNextPage()"
+          @click="table.nextPage()">
           <ChevronRight class="h-4 w-4" />
         </button>
-        <button
-          class="dt-pagination-btn"
-          :disabled="!table.getCanNextPage()"
-          @click="table.setPageIndex(table.getPageCount() - 1)"
-        >
+        <button class="dt-pagination-btn" :disabled="!table.getCanNextPage()"
+          @click="table.setPageIndex(table.getPageCount() - 1)">
           <ChevronsRight class="h-4 w-4" />
         </button>
       </div>
