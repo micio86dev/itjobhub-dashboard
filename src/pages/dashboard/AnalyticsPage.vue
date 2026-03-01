@@ -117,12 +117,6 @@ const skillsChartData = computed(() =>
 </template>
 
 <style scoped>
-.page-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
 .analytics-header {
   display: flex;
   align-items: center;

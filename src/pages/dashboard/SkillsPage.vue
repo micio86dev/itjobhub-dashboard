@@ -56,12 +56,6 @@ const tableColumns: ColumnDef<SkillStat>[] = [
 </template>
 
 <style scoped>
-.page-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
 .placeholder-inner {
   text-align: center;
 }

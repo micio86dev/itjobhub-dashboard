@@ -10,6 +10,7 @@
 @import './css/utilities.css';
 
 /* ── Shared component classes ── */
+@import './css/components/pages-common.css';
 @import './css/components/buttons.css';
 @import './css/components/forms.css';
 @import './css/components/cards.css';
@@ -18,3 +19,4 @@
 @import './css/components/data-table.css';
 @import './css/components/nav.css';
 @import './css/components/skeleton.css';
+@import './css/components/messages.css';

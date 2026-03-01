@@ -44,22 +44,30 @@
     &::placeholder {
       color: var(--c-text-subtle);
     }
+
     &:focus {
       outline: none;
       border-color: var(--c-primary);
     }
+
     &.is-error {
       border-color: var(--c-danger-border-input);
-      &:focus { border-color: var(--c-danger-focus); }
+
+      &:focus {
+        border-color: var(--c-danger-focus);
+      }
     }
   }
 
   /* Input with left icon padding */
   .form-input-icon-left {
-    padding-left: 2.5rem; /* pl-10 */
+    padding-left: 2.5rem;
+    /* pl-10 */
   }
+
   .form-input-icon-right {
-    padding-right: 2.5rem; /* pr-10 */
+    padding-right: 2.5rem;
+    /* pr-10 */
   }
 
   /* ── Select ── */
@@ -122,7 +130,9 @@
     border: none;
     padding: 0;
 
-    &:hover { color: var(--c-text-secondary); }
+    &:hover {
+      color: var(--c-text-secondary);
+    }
   }
 
   /* ── Quick search (compact, max-width) ── */
@@ -136,7 +146,10 @@
     color: var(--c-text-base);
     transition: border-color 150ms ease;
 
-    &::placeholder { color: var(--c-text-subtle); }
+    &::placeholder {
+      color: var(--c-text-subtle);
+    }
+
     &:focus {
       outline: none;
       border-color: var(--c-primary);

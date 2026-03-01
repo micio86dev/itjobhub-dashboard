@@ -7,11 +7,13 @@ import {
   Newspaper, BarChart3, Wrench, LogOut, Mail,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUnreadMessages } from '@/composables/useUnreadMessages'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const { unreadCount } = useUnreadMessages()
 
 const navItems = computed(() => [
   { key: 'overview', to: '/dashboard', icon: LayoutDashboard, label: t('nav.overview'), exact: true },
@@ -52,6 +54,10 @@ async function handleLogout() {
           <router-link :to="item.to" class="nav-link" :class="{ 'is-active': isActive(item) }">
             <component :is="item.icon" class="nav-icon" />
             <span>{{ item.label }}</span>
+            <!-- Unread messages badge -->
+            <span v-if="item.key === 'messages' && unreadCount > 0" class="unread-badge">
+              {{ unreadCount }}
+            </span>
           </router-link>
         </li>
       </ul>
@@ -85,6 +91,22 @@ async function handleLogout() {
 .nav-icon {
   width: 1rem;
   height: 1rem;
+  flex-shrink: 0;
+}
+
+.unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  background-color: var(--c-danger);
+  color: var(--c-text-inverted);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-left: auto;
   flex-shrink: 0;
 }
 

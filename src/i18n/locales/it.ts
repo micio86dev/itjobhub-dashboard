@@ -5,6 +5,7 @@ export default {
     retry: 'Riprova',
     save: 'Salva',
     cancel: 'Annulla',
+    saving: 'Salvataggio in corso...',
     delete: 'Elimina',
     edit: 'Modifica',
     view: 'Visualizza',
@@ -204,6 +205,7 @@ export default {
     date: 'Data',
     unreadReplies: 'Risposte Non Lette',
     status: 'Stato',
+    userType: 'Tipo Utente',
     registeredUser: 'Utente Registrato',
     anonymous: 'Anonimo',
     reply: 'Rispondi',
@@ -221,6 +223,17 @@ export default {
     sentAnonymously: 'Messaggio anonimo',
     errorLoading: 'Errore nel caricamento dei messaggi',
     sending: 'Invio in corso...',
+    markAsRead: 'Marca come letto',
+    deleteReply: 'Elimina Risposta',
+    confirmDeleteReply: 'Sei sicuro di voler eliminare questa risposta?',
+  },
+  contact: {
+    type: {
+      general: 'Contatto Generale',
+      error: 'Segnala un errore sul sito',
+      participation: 'Richiesta di partecipazione sviluppo',
+      other: 'Altro',
+    },
   },
   theme: {
     light: 'Tema chiaro',

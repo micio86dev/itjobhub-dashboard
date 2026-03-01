@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { ExternalLink, Trash2 } from 'lucide-vue-next'
 import DataTable from '@/components/organisms/DataTable.vue'
+import ConfirmDialog from '@/components/organisms/ConfirmDialog.vue'
 import { jobsService } from '@/services/jobs.service'
 import { jobsApi } from '@/api'
 import type { ColumnDef } from '@tanstack/vue-table'
@@ -72,15 +73,12 @@ async function confirmDelete() {
       </select>
     </div>
 
-    <DataTable :columns="columns" :data="jobsQ.data.value?.items ?? []" :loading="jobsQ.isPending.value" :exportable="true">
+    <DataTable :columns="columns" :data="jobsQ.data.value?.items ?? []" :loading="jobsQ.isPending.value"
+      :exportable="true">
       <template #row-actions="{ row }">
         <div class="row-actions">
-          <a
-            v-if="(row as JobListItem).source_url"
-            :href="(row as JobListItem).source_url ?? ''"
-            target="_blank"
-            class="btn-row-action is-primary"
-          >
+          <a v-if="(row as JobListItem).source_url" :href="(row as JobListItem).source_url ?? ''" target="_blank"
+            class="btn-row-action is-primary">
             <ExternalLink class="h-4 w-4" />
           </a>
           <button class="btn-row-action is-danger" @click="confirmDeleteId = (row as JobListItem).id">
@@ -90,40 +88,14 @@ async function confirmDelete() {
       </template>
     </DataTable>
 
-    <!-- Confirm delete dialog -->
-    <div v-if="confirmDeleteId" class="overlay" @click.self="confirmDeleteId = null">
-      <div class="dialog">
-        <h3 class="dialog-title">{{ $t('jobs.removeJob') }}</h3>
-        <p class="dialog-body">{{ $t('jobs.confirmRemove') }}</p>
-        <div class="dialog-footer">
-          <button class="btn-ghost" @click="confirmDeleteId = null">{{ $t('common.cancel') }}</button>
-          <button class="btn-danger" @click="confirmDelete">{{ $t('common.delete') }}</button>
-        </div>
-      </div>
-    </div>
+    <!-- Confirm Delete Dialog -->
+    <ConfirmDialog v-model:isOpen="confirmDeleteId" :title="$t('jobs.removeJob')" :message="$t('jobs.confirmRemove')"
+      @confirm="confirmDelete" />
 
   </div>
 </template>
 
 <style scoped>
-.page-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.page-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
 .filters-row {
   display: flex;
   flex-wrap: wrap;

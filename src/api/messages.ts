@@ -105,6 +105,20 @@ export function deleteContact(contactId: string): Promise<ApiResponse<{ success:
 }
 
 /**
+ * Update a reply (admin only)
+ */
+export function updateReply(contactId: string, replyId: string, data: ReplyParams): Promise<ApiResponse<ReplyResponse>> {
+  return http.put<ReplyResponse>(`/messages/contacts/${contactId}/replies/${replyId}`, data)
+}
+
+/**
+ * Delete a reply (admin only)
+ */
+export function deleteReply(contactId: string, replyId: string): Promise<ApiResponse<{ success: boolean }>> {
+  return http.delete<{ success: boolean }>(`/messages/contacts/${contactId}/replies/${replyId}`)
+}
+
+/**
  * Get user's own contacts and replies
  */
 export function getUserContacts(params?: { page?: number; limit?: number }): Promise<ApiResponse<GetContactsResponse>> {

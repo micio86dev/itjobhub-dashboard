@@ -133,23 +133,3 @@ function refreshAll() { qc.invalidateQueries() }
 
   </div>
 </template>
-
-<style scoped>
-.page-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.page-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-subtitle {
-  margin-top: 0.125rem;
-  font-size: var(--text-sm);
-  color: var(--c-text-muted);
-}
-</style>

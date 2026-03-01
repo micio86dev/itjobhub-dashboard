@@ -26,6 +26,10 @@ const props = withDefaults(
   { loading: false, pageSize: 25, searchable: true, exportable: false },
 )
 
+const emit = defineEmits<{
+  'row-click': [row: T]
+}>()
+
 const { t } = useI18n()
 
 const globalFilter = shallowRef('')
@@ -167,6 +171,7 @@ watch(globalFilter, () => { table.setPageIndex(0) })
               :key="row.id"
               :data-testid="`row-${idx}`"
               class="dt-row"
+              @click="emit('row-click', row.original)"
             >
               <td
                 v-for="cell in row.getVisibleCells()"
@@ -236,6 +241,10 @@ watch(globalFilter, () => { table.setPageIndex(0) })
 </template>
 
 <style scoped>
+.dt-row {
+  cursor: pointer;
+}
+
 .dt-th-inner {
   display: flex;
   align-items: center;

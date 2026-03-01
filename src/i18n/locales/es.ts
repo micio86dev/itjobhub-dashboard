@@ -1,7 +1,7 @@
 export default {
   common: {
     loading: 'Cargando...', error: 'Error', retry: 'Reintentar', save: 'Guardar',
-    cancel: 'Cancelar', delete: 'Eliminar', edit: 'Editar', view: 'Ver',
+    cancel: 'Cancelar', saving: 'Guardando...', delete: 'Eliminar', edit: 'Editar', view: 'Ver',
     close: 'Cerrar', confirm: 'Confirmar', search: 'Buscar...', noResults: 'Sin resultados',
     total: 'Total', of: 'de', actions: 'Acciones', filters: 'Filtros', reset: 'Restablecer',
     export: 'Exportar CSV', refresh: 'Actualizar', all: 'Todos', yes: 'Sí', no: 'No',
@@ -17,39 +17,58 @@ export default {
     brandDescription: 'Gestiona empleos, usuarios y analíticas desde una única interfaz.',
     panelSubtitle: 'DevBoards Admin Panel',
   },
-  nav: { overview: 'Resumen', users: 'Usuarios', companies: 'Empresas', jobs: 'Empleos',
-    jobsMap: 'Mapa Empleos', news: 'Noticias', analytics: 'Analíticas', skills: 'Habilidades', messages: 'Mensajes', profile: 'Perfil' },
-  overview: { title: 'Panel de Control', subtitle: 'Actualizado el', totalUsers: 'Usuarios totales',
+  nav: {
+    overview: 'Resumen', users: 'Usuarios', companies: 'Empresas', jobs: 'Empleos',
+    jobsMap: 'Mapa Empleos', news: 'Noticias', analytics: 'Analíticas', skills: 'Habilidades', messages: 'Mensajes', profile: 'Perfil'
+  },
+  overview: {
+    title: 'Panel de Control', subtitle: 'Actualizado el', totalUsers: 'Usuarios totales',
     activeJobs: 'Empleos activos', companies: 'Empresas', news: 'Noticias',
     registrationsChart: 'Nuevos registros (30d)', jobsWeeklyChart: 'Empleos por semana (8sem)',
     loginMethods: 'Métodos de acceso', topSkills: 'Top 10 habilidades', topLanguages: 'Top 10 idiomas',
-    latestJobs: 'Últimos 10 empleos', latestUsers: 'Últimos 10 usuarios' },
-  table: { page: 'Página', next: 'Siguiente', prev: 'Anterior', first: 'Primera', last: 'Última',
-    rowsPerPage: 'Filas por página', selected: '{n} seleccionados', emptyState: 'Sin datos', search: 'Buscar...' },
-  users: { title: 'Usuarios', name: 'Nombre', email: 'Correo', role: 'Rol', loginMethod: 'Método',
+    latestJobs: 'Últimos 10 empleos', latestUsers: 'Últimos 10 usuarios'
+  },
+  table: {
+    page: 'Página', next: 'Siguiente', prev: 'Anterior', first: 'Primera', last: 'Última',
+    rowsPerPage: 'Filas por página', selected: '{n} seleccionados', emptyState: 'Sin datos', search: 'Buscar...'
+  },
+  users: {
+    title: 'Usuarios', name: 'Nombre', email: 'Correo', role: 'Rol', loginMethod: 'Método',
     registeredAt: 'Registrado el', applications: 'Solicitudes', viewProfile: 'Ver perfil',
-    filterByMethod: 'Filtrar por método', filterByDate: 'Fecha desde', noEndpoint: 'Endpoint no disponible — datos mock' },
-  companies: { title: 'Empresas', name: 'Nombre', website: 'Sitio web', trustScore: 'Puntuación',
-    jobsCount: 'Empleos activos', createdAt: 'Creada el', viewDetails: 'Ver detalles', latestJobs: 'Últimos 5 empleos', noJobs: 'Sin empleos', ratings: 'Valoraciones' },
-  jobs: { title: 'Empleos', jobTitle: 'Título', company: 'Empresa', location: 'Lugar', type: 'Tipo',
+    filterByMethod: 'Filtrar por método', filterByDate: 'Fecha desde', noEndpoint: 'Endpoint no disponible — datos mock'
+  },
+  companies: {
+    title: 'Empresas', name: 'Nombre', website: 'Sitio web', trustScore: 'Puntuación',
+    jobsCount: 'Empleos activos', createdAt: 'Creada el', viewDetails: 'Ver detalles', latestJobs: 'Últimos 5 empleos', noJobs: 'Sin empleos', ratings: 'Valoraciones'
+  },
+  jobs: {
+    title: 'Empleos', jobTitle: 'Título', company: 'Empresa', location: 'Lugar', type: 'Tipo',
     contract: 'Contrato', level: 'Nivel', skills: 'Habilidades', status: 'Estado', publishedAt: 'Publicado el',
     viewExternal: 'Ver anuncio', changeStatus: 'Cambiar estado', removeJob: 'Eliminar', confirmRemove: '¿Confirmar eliminación?',
     map: 'Mapa Empleos', workMode: { remote: 'Remoto', hybrid: 'Híbrido', onsite: 'Presencial' },
     contractType: { fullTime: 'Tiempo completo', partTime: 'Tiempo parcial', freelance: 'Freelance', internship: 'Prácticas' },
-    statusOptions: { active: 'Activo', closed: 'Cerrado', draft: 'Borrador' }, allStatus: 'Todos los estados' },
-  map: { title: 'Mapa Empleos', jobsFound: 'empleos encontrados', resetFilters: 'Restablecer', filterSkills: 'Habilidades',
+    statusOptions: { active: 'Activo', closed: 'Cerrado', draft: 'Borrador' }, allStatus: 'Todos los estados'
+  },
+  map: {
+    title: 'Mapa Empleos', jobsFound: 'empleos encontrados', resetFilters: 'Restablecer', filterSkills: 'Habilidades',
     filterCompany: 'Empresa', filterWorkMode: 'Modalidad', filterContract: 'Contrato', filterLevel: 'Nivel',
-    filterPublished: 'Publicado en los últimos', days7: '7 días', days30: '30 días', days90: '90 días', viewDetail: 'Ver detalle' },
+    filterPublished: 'Publicado en los últimos', days7: '7 días', days30: '30 días', days90: '90 días', viewDetail: 'Ver detalle'
+  },
   news: { title: 'Noticias', newsTitle: 'Título', category: 'Categoría', language: 'Idioma', publishedAt: 'Publicado el', status: 'Estado', views: 'Vistas' },
-  analytics: { title: 'Analíticas', period: 'Período', days7: '7 días', days30: '30 días', days90: '90 días', months12: '12 meses',
+  analytics: {
+    title: 'Analíticas', period: 'Período', days7: '7 días', days30: '30 días', days90: '90 días', months12: '12 meses',
     userBehavior: 'Comportamiento usuarios', searches: 'Búsquedas', jobsPerformance: 'Rendimiento empleos',
     registrations: 'Registros & Auth', dailySessions: 'Sesiones diarias', activityHeatmap: 'Actividad hora × día',
     topKeywords: 'Top 20 palabras clave', keywordsTable: 'Palabra clave', jobsBySector: 'Empleos por sector', dailyApplications: 'Solicitudes diarias',
     conversionRate: 'Tasa de conversión media', registrationsByMethod: 'Registros por método', trendVsLogin: 'Registros vs Inicios sesión (6 meses)',
-    toImplement: 'Por implementar en backend' },
-  skills: { title: 'Habilidades', topJobSkills: 'Top 30 habilidades', topSearchedSkills: 'Top 20 más buscadas',
-    skillsTable: 'Habilidad', jobCount: '# Empleos', searchCount: '# Búsquedas', trend: 'Tendencia', noSearchData: 'Datos no disponibles (TODO)' },
-  messages: { title: 'Mensajes de Contacto', myMessages: 'Mis Mensajes', from: 'De', email: 'Correo electrónico', subject: 'Asunto', date: 'Fecha', unreadReplies: 'Respuestas No Leídas', status: 'Estado', registeredUser: 'Usuario Registrado', anonymous: 'Anónimo', reply: 'Responder', replies: 'Respuestas', read: 'Lectura', unread: 'No Leído', originalMessage: 'Mensaje Original', replyPlaceholder: 'Escribe tu respuesta...', send: 'Enviar', answered: 'Respondido', pending: 'Pendiente', noMessages: 'Sin mensajes disponibles', noRepliesYet: 'Sin respuestas aún', youSent: 'Mensaje enviado por ti', sentAnonymously: 'Mensaje anónimo', errorLoading: 'Error al cargar los mensajes', sending: 'Enviando...' },
+    toImplement: 'Por implementar en backend'
+  },
+  skills: {
+    title: 'Habilidades', topJobSkills: 'Top 30 habilidades', topSearchedSkills: 'Top 20 más buscadas',
+    skillsTable: 'Habilidad', jobCount: '# Empleos', searchCount: '# Búsquedas', trend: 'Tendencia', noSearchData: 'Datos no disponibles (TODO)'
+  },
+  messages: { title: 'Mensajes de Contacto', myMessages: 'Mis Mensajes', from: 'De', email: 'Correo electrónico', subject: 'Asunto', date: 'Fecha', unreadReplies: 'Respuestas No Leídas', status: 'Estado', userType: 'Tipo de Usuario', registeredUser: 'Usuario Registrado', anonymous: 'Anónimo', reply: 'Responder', replies: 'Respuestas', read: 'Lectura', unread: 'No Leído', originalMessage: 'Mensaje Original', replyPlaceholder: 'Escribe tu respuesta...', send: 'Enviar', answered: 'Respondido', pending: 'Pendiente', noMessages: 'Sin mensajes disponibles', noRepliesYet: 'Sin respuestas aún', youSent: 'Mensaje enviado por ti', sentAnonymously: 'Mensaje anónimo', errorLoading: 'Error al cargar los mensajes', sending: 'Enviando...', markAsRead: 'Marcar como leído', deleteReply: 'Eliminar Respuesta', confirmDeleteReply: '¿Estás seguro de que deseas eliminar esta respuesta?' },
+  contact: { type: { general: 'Contacto general', error: 'Informar de un error en el sitio', participation: 'Solicitud de participación en el desarrollo', other: 'Otro' } },
   theme: { light: 'Tema claro', dark: 'Tema oscuro', toggle: 'Cambiar tema' },
   language: { it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch' },
   errors: { generic: 'Se produjo un error.', notFound: 'Página no encontrada', notFoundDesc: 'Esta página no existe.', backHome: 'Volver al inicio', loadFailed: 'Error al cargar datos' },
