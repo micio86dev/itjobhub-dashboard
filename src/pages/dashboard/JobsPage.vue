@@ -1,109 +1,120 @@
+<script setup lang="ts">
+import { shallowRef, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
+import { ExternalLink, Trash2 } from 'lucide-vue-next'
+import DataTable from '@/components/organisms/DataTable.vue'
+import ConfirmDialog from '@/components/organisms/ConfirmDialog.vue'
+import { jobsService } from '@/services/jobs.service'
+import { jobsApi } from '@/api'
+import type { ColumnDef } from '@tanstack/vue-table'
+import type { JobListItem } from '@/api'
+
+const { t } = useI18n()
+const qc = useQueryClient()
+
+const statusFilter = shallowRef('')
+const workModeFilter = shallowRef('')
+const confirmDeleteId = shallowRef<string | null>(null)
+
+const queryParams = computed(() => ({
+  limit: 50,
+  status: statusFilter.value || undefined,
+  workMode: workModeFilter.value || undefined,
+}))
+
+const jobsQ = useQuery({
+  queryKey: ['jobs-page', queryParams],
+  queryFn: () => jobsService.getJobs(queryParams.value),
+})
+
+const columns: ColumnDef<JobListItem>[] = [
+  { id: 'title', accessorKey: 'title', header: t('jobs.jobTitle'), cell: ({ row }) => row.original.title },
+  { id: 'company', accessorFn: (r) => r.company?.name ?? '-', header: t('jobs.company') },
+  { id: 'skills', accessorFn: (r) => r.skills.slice(0, 3).join(', ') + (r.skills.length > 3 ? ` +${r.skills.length - 3}` : ''), header: t('jobs.skills') },
+  { id: 'workMode', accessorKey: 'workMode', header: t('jobs.type') },
+  { id: 'contractType', accessorKey: 'contractType', header: t('jobs.contract') },
+  { id: 'seniority', accessorKey: 'seniority', header: t('jobs.level') },
+  { id: 'created_at', accessorFn: (r) => r.created_at?.slice(0, 10) ?? '-', header: t('jobs.publishedAt') },
+  { id: 'status', accessorKey: 'status', header: t('jobs.status') },
+]
+
+async function confirmDelete() {
+  if (!confirmDeleteId.value) return
+  await jobsApi.deleteJob(confirmDeleteId.value)
+  confirmDeleteId.value = null
+  qc.invalidateQueries({ queryKey: ['jobs-page'] })
+}
+</script>
+
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h2 class="font-bold text-3xl tracking-tight">{{ t('jobsList.title') }}</h2>
+  <div class="page-stack">
+
+    <div class="page-header-row">
+      <div class="page-title-group">
+        <h1 class="page-title">{{ $t('jobs.title') }}</h1>
+        <span v-if="jobsQ.data.value" class="badge">{{ jobsQ.data.value.total }}</span>
+      </div>
     </div>
 
     <!-- Filters -->
-    <div class="flex sm:flex-row flex-col gap-4">
-      <div class="relative w-full sm:max-w-xs">
-        <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input v-model="filters.search" :placeholder="t('jobsList.searchPlaceholder')" class="pl-9"
-          @input="handleSearch" />
-      </div>
-      <Select v-model="filters.type" @update:model-value="() => refetch()">
-        <SelectTrigger class="w-[180px]">
-          <SelectValue :placeholder="t('jobsList.filters.allTypes')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ t('jobsList.filters.allTypes') }}</SelectItem>
-          <SelectItem value="full-time">{{ t('jobsList.filters.fullTime') }}</SelectItem>
-          <SelectItem value="part-time">{{ t('jobsList.filters.partTime') }}</SelectItem>
-          <SelectItem value="contract">{{ t('jobsList.filters.contract') }}</SelectItem>
-          <SelectItem value="freelance">{{ t('jobsList.filters.freelance') }}</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select v-model="filters.status" @update:model-value="() => refetch()">
-        <SelectTrigger class="w-[180px]">
-          <SelectValue :placeholder="t('jobsList.filters.allStatuses')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ t('jobsList.filters.allStatuses') }}</SelectItem>
-          <SelectItem value="active">{{ t('jobsList.filters.active') }}</SelectItem>
-          <SelectItem value="draft">{{ t('jobsList.filters.draft') }}</SelectItem>
-          <SelectItem value="closed">{{ t('jobsList.filters.closed') }}</SelectItem>
-        </SelectContent>
-      </Select>
+    <div class="filters-row">
+      <select v-model="statusFilter" class="form-select filter-select">
+        <option value="">{{ $t('jobs.allStatus') }}</option>
+        <option value="active">{{ $t('jobs.statusOptions.active') }}</option>
+        <option value="closed">{{ $t('jobs.statusOptions.closed') }}</option>
+        <option value="draft">{{ $t('jobs.statusOptions.draft') }}</option>
+      </select>
+      <select v-model="workModeFilter" class="form-select filter-select">
+        <option value="">{{ $t('common.all') }}</option>
+        <option value="remote">{{ $t('jobs.workMode.remote') }}</option>
+        <option value="hybrid">{{ $t('jobs.workMode.hybrid') }}</option>
+        <option value="onsite">{{ $t('jobs.workMode.onsite') }}</option>
+      </select>
     </div>
 
-    <Alert v-if="isError" variant="destructive">
-      <AlertTitle>{{ t('overview.error') }}</AlertTitle>
-      <AlertDescription class="flex justify-between items-center">
-        <span>{{ t('overview.error') }}</span>
-        <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
-      </AlertDescription>
-    </Alert>
-
-    <!-- Table -->
-    <DataTable :columns="columns" :data="(jobsData?.data as any) || []" :loading="isLoading"
-      :total-rows="jobsData?.total" :page-size="10">
-      <template #row-actions>
-        <div class="flex items-center gap-2">
-          <Button variant="outline" size="sm" class="h-8">
-            {{ t('jobsList.actions.edit') }}
-          </Button>
-          <Button variant="secondary" size="sm" class="h-8">
-            {{ t('jobsList.actions.viewApplications') }}
-          </Button>
-          <Button variant="ghost" size="sm" class="hover:bg-destructive/10 h-8 text-destructive hover:text-destructive">
-            {{ t('jobsList.actions.closeJob') }}
-          </Button>
+    <DataTable :columns="columns" :data="jobsQ.data.value?.items ?? []" :loading="jobsQ.isPending.value"
+      :exportable="true">
+      <template #row-actions="{ row }">
+        <div class="row-actions">
+          <a v-if="(row as JobListItem).source_url" :href="(row as JobListItem).source_url ?? ''" target="_blank"
+            class="btn-row-action is-primary">
+            <ExternalLink class="h-4 w-4" />
+          </a>
+          <button class="btn-row-action is-danger" @click="confirmDeleteId = (row as JobListItem).id">
+            <Trash2 class="h-4 w-4" />
+          </button>
         </div>
       </template>
     </DataTable>
+
+    <!-- Confirm Delete Dialog -->
+    <ConfirmDialog v-model:isOpen="confirmDeleteId" :title="$t('jobs.removeJob')" :message="$t('jobs.confirmRemove')"
+      @confirm="confirmDelete" />
+
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery } from '@tanstack/vue-query'
-import { Search } from 'lucide-vue-next'
-import { useDebounceFn } from '@vueuse/core'
+<style scoped>
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
 
-import { getJobsColumns } from '@/components/organisms/columns/jobs.columns'
-import { jobsService } from '@/services/jobs.service'
-import type { ColumnDef } from '@tanstack/vue-table'
+.filter-select {
+  width: auto;
+}
 
-import DataTable from '@/components/organisms/DataTable.vue'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
 
-const { t } = useI18n()
-
-const filters = ref({
-  search: '',
-  type: 'all',
-  status: 'all'
-})
-
-// Columns
-const columns = computed(() => getJobsColumns(t) as unknown as ColumnDef<Record<string, unknown>, unknown>[])
-
-// Query
-const { data: jobsData, isLoading, isError, refetch } = useQuery({
-  queryKey: ['jobs', filters],
-  queryFn: () => jobsService.getJobs({
-    search: filters.value.search,
-    type: filters.value.type !== 'all' ? filters.value.type : undefined,
-    status: filters.value.status !== 'all' ? filters.value.status : undefined,
-  }),
-  staleTime: 5 * 60 * 1000
-})
-
-const handleSearch = useDebounceFn(() => {
-  refetch()
-}, 300)
-</script>
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+</style>

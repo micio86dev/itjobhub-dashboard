@@ -1,102 +1,139 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { ChevronDown, User, LogOut, Menu } from 'lucide-vue-next'
+import ThemeToggle from './ThemeToggle.vue'
+import { useAuthStore } from '@/stores/auth.store'
+import { setLocale, type Locale } from '@/i18n'
+
+const emit = defineEmits<{ 'toggle-sidebar': [] }>()
+
+const { t, locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
+const langMenuOpen = ref(false)
+const userMenuOpen = ref(false)
+
+const breadcrumb = computed(() => {
+  const key = route.meta.breadcrumb
+  return key ? t(key) : ''
+})
+
+const locales: { code: Locale; label: string }[] = [
+  { code: 'it', label: 'Italiano' },
+  { code: 'en', label: 'English' },
+  { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
+  { code: 'de', label: 'Deutsch' },
+]
+
+function selectLocale(code: Locale) {
+  setLocale(code)
+  langMenuOpen.value = false
+}
+
+async function handleLogout() {
+  userMenuOpen.value = false
+  authStore.logout()
+  await router.push('/login')
+}
+</script>
+
 <template>
-  <header class="top-0 z-10 sticky flex items-center bg-background px-4 md:px-6 border-b h-16 shrink-0">
-    <div class="flex items-center gap-4">
-      <SidebarTrigger class="md:hidden" />
-      <div class="hidden md:flex items-center space-x-2 text-muted-foreground text-sm">
-        <!-- Minimal Breadcrumb based on route meta -->
-        <span class="font-medium text-foreground capitalize">{{ currentRouteName }}</span>
+  <header class="app-header">
+    <!-- Mobile hamburger -->
+    <button class="btn-icon mobile-menu-btn" @click="emit('toggle-sidebar')">
+      <Menu class="h-5 w-5" />
+    </button>
+
+    <!-- Breadcrumb -->
+    <div class="header-breadcrumb">{{ breadcrumb }}</div>
+
+    <!-- Actions -->
+    <div class="header-actions">
+
+      <!-- Language selector -->
+      <div class="header-menu-anchor">
+        <button class="header-lang-btn" @click="langMenuOpen = !langMenuOpen">
+          {{ locale }}
+          <ChevronDown class="h-3.5 w-3.5" />
+        </button>
+        <div v-if="langMenuOpen" class="dropdown lang-dropdown">
+          <button
+            v-for="loc in locales"
+            :key="loc.code"
+            class="dropdown-item"
+            :class="{ 'is-active': locale === loc.code }"
+            @click="selectLocale(loc.code)"
+          >
+            {{ loc.label }}
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="flex items-center gap-4 ml-auto">
-      <!-- Language Selector -->
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="ghost" size="icon" :aria-label="t('layout.header.changeLanguage')">
-            <Globe class="w-[1.2rem] h-[1.2rem]" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem @click="setLocale('it')">Italiano</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('en')">English</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('fr')">Français</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('es')">Español</DropdownMenuItem>
-          <DropdownMenuItem @click="setLocale('de')">Deutsch</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <!-- Theme Toggle -->
       <ThemeToggle />
 
-      <!-- User Dropdown -->
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="ghost" class="relative rounded-full w-8 h-8">
-            <Avatar class="w-8 h-8">
-              <AvatarImage :src="authStore.user?.avatar || ''" :alt="authStore.userName" />
-              <AvatarFallback>{{ authStore.user?.firstName?.[0] || 'U' }}</AvatarFallback>
-            </Avatar>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent class="w-56" align="end" force-mount>
-          <DropdownMenuLabel class="font-normal">
-            <div class="flex flex-col space-y-1">
-              <p class="font-medium text-sm leading-none">{{ authStore.userName }}</p>
-              <p class="text-muted-foreground text-xs leading-none">{{ authStore.user?.email }}</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <!-- TODO: Profile page route -->
-            <UserIcon class="mr-2 w-4 h-4" />
-            <span>{{ t('layout.header.profile') }}</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem @click="handleLogout" class="text-destructive">
-            <LogOut class="mr-2 w-4 h-4" />
-            <span>{{ t('layout.header.logout') }}</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <!-- User menu -->
+      <div class="header-menu-anchor">
+        <button class="header-user-btn" @click="userMenuOpen = !userMenuOpen">
+          <span class="user-avatar user-avatar-sm">
+            {{ authStore.userName.slice(0, 2) || 'AD' }}
+          </span>
+          <span class="user-name-label">{{ authStore.userName }}</span>
+          <ChevronDown class="h-3.5 w-3.5" />
+        </button>
+        <div v-if="userMenuOpen" class="dropdown user-dropdown">
+          <button class="dropdown-item" @click="userMenuOpen = false">
+            <User class="h-4 w-4" />
+            {{ $t('nav.profile') }}
+          </button>
+          <div class="dropdown-divider" />
+          <button class="dropdown-item-danger" @click="handleLogout">
+            <LogOut class="h-4 w-4" />
+            {{ $t('auth.logout') }}
+          </button>
+        </div>
+      </div>
+
     </div>
   </header>
 </template>
 
-<script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth.store'
-import { useI18n } from 'vue-i18n'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import ThemeToggle from '@/components/layout/ThemeToggle.vue'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-
-import { Globe, User as UserIcon, LogOut } from 'lucide-vue-next'
-
-const route = useRoute()
-const router = useRouter()
-const authStore = useAuthStore()
-const { t, locale } = useI18n()
-
-const currentRouteName = computed(() => {
-  return typeof route.name === 'string' ? route.name.replace('-', ' ') : 'Dashboard'
-})
-
-function setLocale(lang: string) {
-  locale.value = lang
+<style scoped>
+.mobile-menu-btn {
+  /* visible only on mobile */
+  display: none;
 }
 
-async function handleLogout() {
-  await authStore.logout()
-  router.push('/login')
+@media (max-width: 1023px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
 }
-</script>
+
+.header-menu-anchor {
+  position: relative;
+}
+
+.lang-dropdown {
+  min-width: 9rem;
+}
+
+.user-dropdown {
+  min-width: 10rem;
+}
+
+.user-name-label {
+  display: none;
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 768px) {
+  .user-name-label {
+    display: inline;
+  }
+}
+</style>

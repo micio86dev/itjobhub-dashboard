@@ -1,43 +1,54 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Dependencies
+node_modules/
 
-node_modules
+# Build
+dist/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Cache
+*.tsbuildinfo
+.eslintcache
+.vite/
+.rollup.cache/
+
+# Test
+coverage/
+test-results/
+playwright-report/
+
+# OS
 .DS_Store
 dist
 dist-ssr
 coverage
 *.local
 .env
+Thumbs.db
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-*.tsbuildinfo
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
-.eslintcache
+# Compiled JS duplicates (stale artifacts)
+src/**/*.js
+src/**/*.js.map
 
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
-
-# Vitest
-__screenshots__/
-
-# Vite
-*.timestamp-*-*.mjs
-
-test-results/
-playwright-report/
+# Agents / AI
+.agents/
+.claude/

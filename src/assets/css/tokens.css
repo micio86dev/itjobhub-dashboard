@@ -1,0 +1,132 @@
+/* ============================================================
+   Design Tokens — semantic CSS custom properties
+   All visual decisions live here; components reference these vars.
+   ============================================================ */
+
+:root {
+  /* === Primary / Brand (green) === */
+  --c-primary:            var(--color-green-500);
+  --c-primary-hover:      var(--color-green-600);
+  --c-primary-focus-ring: var(--color-green-400);
+  --c-primary-surface:    var(--color-green-50);
+  --c-primary-text:       var(--color-green-700);
+  --c-primary-subtle:     var(--color-green-100);
+
+  /* === Surfaces === */
+  --c-surface:            var(--color-white);
+  --c-surface-muted:      var(--color-zinc-50);
+  --c-surface-raised:     var(--color-zinc-100);
+  --c-surface-input:      var(--color-zinc-50);
+  --c-surface-app:        var(--color-zinc-50);
+
+  /* === Borders === */
+  --c-border:             var(--color-zinc-200);
+  --c-border-muted:       var(--color-zinc-100);
+  --c-border-input:       var(--color-zinc-200);
+  --c-border-strong:      var(--color-zinc-300);
+
+  /* === Text === */
+  --c-text-base:          var(--color-zinc-900);
+  --c-text-secondary:     var(--color-zinc-700);
+  --c-text-muted:         var(--color-zinc-500);
+  --c-text-subtle:        var(--color-zinc-400);
+  --c-text-inverted:      var(--color-white);
+
+  /* === Danger === */
+  --c-danger:             var(--color-red-500);
+  --c-danger-hover:       var(--color-red-600);
+  --c-danger-surface:     var(--color-red-50);
+  --c-danger-text:        var(--color-red-700);
+  --c-danger-border:      var(--color-red-200);
+  --c-danger-border-input:var(--color-red-400);
+  --c-danger-focus:       var(--color-red-500);
+
+  /* === Chart Colors === */
+  --c-chart-primary:      var(--color-green-500);
+  --c-chart-primary-alt:  var(--color-green-600);
+  --c-chart-secondary:    var(--color-blue-500);
+  --c-chart-accent:       var(--color-amber-500);
+  --c-chart-text:         var(--color-zinc-500);
+  --c-chart-text-muted:   var(--color-zinc-400);
+  --c-chart-text-strong:  var(--color-zinc-700);
+  --c-chart-grid:         var(--color-zinc-200);
+  --c-chart-axis:         var(--color-zinc-300);
+  --c-chart-bg:           var(--c-surface);
+
+  /* === Backdrop === */
+  --c-backdrop:           rgb(0 0 0 / 0.5);
+
+  /* === Shadows === */
+  --shadow-card:    0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-hover:   0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-dialog:  0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-dropdown:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  /* === Border Radius === */
+  --r-sm:    0.375rem;   /* rounded-md   ~6px  */
+  --r-base:  0.5rem;     /* rounded-lg   8px   */
+  --r-card:  0.75rem;    /* rounded-xl   12px  */
+  --r-dialog:1rem;       /* rounded-2xl  16px  */
+  --r-pill:  9999px;     /* rounded-full       */
+
+  /* === Typography === */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-8xl:  6rem;
+
+  /* === Spacing scale (subset) === */
+  --sp-0\.5: 0.125rem;
+  --sp-1:    0.25rem;
+  --sp-1\.5: 0.375rem;
+  --sp-2:    0.5rem;
+  --sp-2\.5: 0.625rem;
+  --sp-3:    0.75rem;
+  --sp-4:    1rem;
+  --sp-5:    1.25rem;
+  --sp-6:    1.5rem;
+  --sp-8:    2rem;
+
+  /* === Transitions === */
+  --transition-colors: color 150ms ease, background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  --transition-shadow: box-shadow 200ms ease;
+}
+
+/* ── Dark mode overrides ── */
+.dark {
+  --c-primary-surface:    color-mix(in oklch, var(--color-green-900) 20%, transparent);
+  --c-primary-text:       var(--color-green-400);
+  --c-primary-subtle:     color-mix(in oklch, var(--color-green-900) 30%, transparent);
+
+  --c-surface:            var(--color-zinc-950);
+  --c-surface-muted:      var(--color-zinc-900);
+  --c-surface-raised:     color-mix(in oklch, var(--color-zinc-800) 50%, transparent);
+  --c-surface-input:      var(--color-zinc-800);
+  --c-surface-app:        var(--color-zinc-900);
+
+  --c-border:             var(--color-zinc-800);
+  --c-border-muted:       var(--color-zinc-800);
+  --c-border-input:       var(--color-zinc-700);
+  --c-border-strong:      var(--color-zinc-700);
+
+  --c-text-base:          var(--color-zinc-100);
+  --c-text-secondary:     var(--color-zinc-300);
+  --c-text-muted:         var(--color-zinc-400);
+  --c-text-subtle:        var(--color-zinc-400);
+
+  --c-danger-surface:     color-mix(in oklch, var(--color-red-900) 20%, transparent);
+  --c-danger-text:        var(--color-red-400);
+  --c-danger-border:      var(--color-red-800);
+  --c-danger-border-input:var(--color-red-600);
+
+  --c-chart-text:         var(--color-zinc-400);
+  --c-chart-text-muted:   var(--color-zinc-500);
+  --c-chart-text-strong:  var(--color-zinc-300);
+  --c-chart-grid:         var(--color-zinc-800);
+  --c-chart-axis:         var(--color-zinc-700);
+  --c-chart-bg:           var(--c-surface);
+}

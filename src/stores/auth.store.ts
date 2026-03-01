@@ -1,73 +1,95 @@
-import { defineStore } from 'pinia';
-import Cookies from 'js-cookie';
-import { apiFetch } from '@/services/api.client';
-import type { User } from '@/types/api';
+import { defineStore } from 'pinia'
+import { shallowRef, computed } from 'vue'
+import Cookies from 'js-cookie'
+import { authApi, usersApi, setToken, getToken } from '@/api'
+import type { Me } from '@/api'
 
-interface AuthState {
-    token: string | null;
-    user: User | null;
-    loading: boolean;
-    error: string | null;
-}
+const TOKEN_KEY = 'admin-token'
+const COOKIE_DAYS = 7
 
-export const useAuthStore = defineStore('auth', {
-    state: (): AuthState => ({
-        token: Cookies.get('admin-token') || null,
-        user: null,
-        loading: false,
-        error: null,
-    }),
-    getters: {
-        isAuthenticated: (state) => !!state.token && !!state.user,
-        userName: (state) => (state.user ? `${state.user.firstName} ${state.user.lastName}` : ''),
-    },
-    actions: {
-        async login(email: string, password: string): Promise<void> {
-            this.loading = true;
-            this.error = null;
-            try {
-                const { data: responseData } = await apiFetch<{ data: { accessToken?: string, token?: string, user: User } }>('/auth/login', {
-                    method: 'POST',
-                    body: { email, password },
-                });
+export const useAuthStore = defineStore('auth', () => {
+  const token = shallowRef<string | null>(Cookies.get(TOKEN_KEY) ?? null)
+  const user = shallowRef<Me | null>(null)
+  const loading = shallowRef(false)
+  const error = shallowRef<string | null>(null)
 
-                this.token = responseData.token || null;
-                this.user = responseData.user;
-                Cookies.set('admin-token', this.token as string, { expires: 7 });
-            } catch (err: unknown) {
-                const fetchErr = err as { data?: { message?: string }, message?: string };
-                this.error = fetchErr.data?.message || fetchErr.message || 'Errore durante il login';
-                throw err;
-            } finally {
-                this.loading = false;
-            }
-        },
-        async logout(): Promise<void> {
-            try {
-                if (this.token) {
-                    await apiFetch('/auth/logout', { method: 'POST' });
-                }
-            } catch {
-                // Silently fail logout if network error
-            } finally {
-                this.token = null;
-                this.user = null;
-                Cookies.remove('admin-token');
-            }
-        },
-        async fetchMe(): Promise<void> {
-            if (!this.token) return;
-            this.loading = true;
-            try {
-                const response = await apiFetch<{ data: User }>('/users/me');
-                this.user = response?.data || null;
-            } catch {
-                this.token = null;
-                this.user = null;
-                Cookies.remove('admin-token');
-            } finally {
-                this.loading = false;
-            }
-        },
-    },
-});
+  const isAuthenticated = computed(() => token.value !== null && user.value !== null)
+  const userName = computed(() => {
+    if (!user.value) return ''
+    return `${user.value.firstName ?? ''} ${user.value.lastName ?? ''}`.trim() || user.value.email
+  })
+
+  // Sync token with API client whenever it changes
+  if (token.value) {
+    setToken(token.value)
+  }
+
+  async function login(email: string, password: string): Promise<void> {
+    loading.value = true
+    error.value = null
+    try {
+      const res = await authApi.login({ email, password })
+      const { token: authToken, user: authUser } = res.data
+      token.value = authToken
+      Cookies.set(TOKEN_KEY, authToken, { expires: COOKIE_DAYS })
+      setToken(authToken)
+      // fetchMe to get the full user profile
+      try {
+        const meRes = await usersApi.getMe()
+        user.value = meRes.data
+      } catch {
+        // Fallback: build minimal user from auth response
+        user.value = authUser as Me
+      }
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : 'Login failed'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function fetchMe(): Promise<void> {
+    if (!token.value) return
+    try {
+      const res = await usersApi.getMe()
+      user.value = res.data
+    } catch {
+      // Token invalid — clear session
+      logout()
+    }
+  }
+
+  function logout(): void {
+    token.value = null
+    user.value = null
+    error.value = null
+    Cookies.remove(TOKEN_KEY)
+    setToken(null)
+    // Fire-and-forget server logout
+    authApi.logout().catch(() => undefined)
+  }
+
+  function clearError(): void {
+    error.value = null
+  }
+
+  // Expose the current token for the API client interceptor pattern
+  function currentToken(): string | null {
+    return getToken()
+  }
+
+  return {
+    token,
+    user,
+    loading,
+    error,
+    isAuthenticated,
+    userName,
+    login,
+    logout,
+    fetchMe,
+    clearError,
+    currentToken,
+  }
+})

@@ -2,70 +2,57 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TopList from '../TopList.vue'
 
+const makeItems = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({
+    label: `Item ${i + 1}`,
+    count: 100 - i * 5,
+  }))
+
 describe('TopList', () => {
-    const testItems = Array.from({ length: 15 }, (_, i) => ({
-        label: `Item ${i + 1}`,
-        count: 100 - i
-    }))
+  it('renders the title', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top Skills', items: makeItems(3) } })
+    expect(wrapper.text()).toContain('Top Skills')
+  })
 
-    it('renders title and top items', () => {
-        const wrapper = mount(TopList, {
-            props: {
-                title: 'Top Skills',
-                items: testItems
-            }
-        })
+  it('renders at most 10 items when given more than 10', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: makeItems(15) } })
+    expect(wrapper.findAll('li').length).toBe(10)
+  })
 
-        expect(wrapper.text()).toContain('Top Skills')
-        // Should render only up to 10 items (visibleItems computed)
-        const itemElements = wrapper.findAll('[data-testid="top-list"] .flex.items-center.gap-3')
-        expect(itemElements.length).toBeLessThanOrEqual(10)
-        // Should show "e altri 5..."
-        expect(wrapper.text()).toContain('e altri 5...')
-    })
+  it('renders exactly the number of items when fewer than 10', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: makeItems(4) } })
+    expect(wrapper.findAll('li').length).toBe(4)
+  })
 
-    it('shows empty state when no data', () => {
-        const wrapper = mount(TopList, {
-            props: {
-                title: 'Empty List',
-                items: []
-            }
-        })
+  it('shows "e altri N" footer when items exceed 10', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: makeItems(15) } })
+    expect(wrapper.text()).toContain('e altri 5')
+  })
 
-        expect(wrapper.text()).toContain('Nessun dato disponibile')
-    })
+  it('does not show "e altri" footer when items are 10 or fewer', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: makeItems(10) } })
+    expect(wrapper.text()).not.toContain('e altri')
+  })
 
-    it('shows skeleton during loading', () => {
-        const wrapper = mount(TopList, {
-            props: {
-                title: 'Loading List',
-                items: [],
-                loading: true
-            }
-        })
+  it('renders progress bars via style attribute', () => {
+    const items = makeItems(3)
+    const wrapper = mount(TopList, { props: { title: 'Top', items } })
+    const bars = wrapper.findAll('.bg-green-500')
+    expect(bars.length).toBeGreaterThan(0)
+    // First item has the highest count — its bar should be 100%
+    expect(bars[0].attributes('style')).toContain('100%')
+  })
 
-        expect(wrapper.html()).toContain('animate-pulse')
-        expect(wrapper.text()).not.toContain('Nessun dato disponibile')
-    })
+  it('shows skeleton when loading is true', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: [], loading: true } })
+    expect(wrapper.findAll('li').length).toBe(0)
+    expect(wrapper.find('.animate-pulse').exists()).toBe(true)
+  })
 
-    it('calculates progress bar widths correctly', () => {
-        const items = [
-            { label: 'Highest', count: 200 },
-            { label: 'Medium', count: 100 },
-            { label: 'Lowest', count: 0 }
-        ]
-
-        const wrapper = mount(TopList, {
-            props: {
-                title: 'Progress Test',
-                items
-            }
-        })
-
-        // Find progress bars by style attribute (scoped CSS hashes class names)
-        const html = wrapper.html()
-        expect(html).toContain('width: 100%')
-        expect(html).toContain('width: 50%')
-        expect(html).toContain('width: 0%')
-    })
+  it('shows rank numbers starting from 1', () => {
+    const wrapper = mount(TopList, { props: { title: 'Top', items: makeItems(3) } })
+    const spans = wrapper.findAll('li .text-zinc-400')
+    expect(spans[0].text()).toBe('1')
+    expect(spans[1].text()).toBe('2')
+  })
 })

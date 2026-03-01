@@ -1,109 +1,228 @@
+<script setup lang="ts">
+import { shallowRef, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuery } from '@tanstack/vue-query'
+import { ExternalLink, Star } from 'lucide-vue-next'
+import { companiesService } from '@/services/companies.service'
+import type { Company } from '@/api'
+
+useI18n()
+const search = shallowRef('')
+const selectedCompany = shallowRef<Company | null>(null)
+const dialogOpen = shallowRef(false)
+
+const companiesQ = useQuery({
+  queryKey: ['companies'],
+  queryFn: () => companiesService.getCompanies({ limit: 100 }),
+})
+
+const filtered = computed(() => {
+  const q = search.value.toLowerCase()
+  return (companiesQ.data.value?.items ?? []).filter((c) =>
+    !q || c.name.toLowerCase().includes(q),
+  )
+})
+
+function openDialog(company: Company) {
+  selectedCompany.value = company
+  dialogOpen.value = true
+}
+</script>
+
 <template>
-  <div class="space-y-6">
-    <div class="flex justify-between items-center">
-      <h2 class="font-bold text-3xl tracking-tight">{{ t('companies.title') }}</h2>
-      <Button>
-        <Plus class="mr-2 w-4 h-4" />
-        {{ t('companies.addCompany') }}
-      </Button>
+  <div class="page-stack">
+
+    <div class="page-header-row">
+      <div class="page-title-group">
+        <h1 class="page-title">{{ $t('companies.title') }}</h1>
+        <span v-if="companiesQ.data.value" class="badge">{{ companiesQ.data.value.total }}</span>
+      </div>
+      <input v-model="search" type="text" :placeholder="$t('common.search')" class="form-search" />
     </div>
 
-    <!-- Filters -->
-    <div class="flex sm:flex-row flex-col gap-4">
-      <div class="relative w-full sm:max-w-xs">
-        <Search class="top-2.5 left-2.5 absolute w-4 h-4 text-muted-foreground" />
-        <Input v-model="filters.search" :placeholder="t('companies.searchPlaceholder')" class="pl-9"
-          @input="handleSearch" />
+    <!-- Loading skeleton grid -->
+    <div v-if="companiesQ.isPending.value" class="companies-grid">
+      <div v-for="i in 9" :key="i" class="skeleton company-skeleton" />
+    </div>
+
+    <!-- Companies grid -->
+    <div v-else class="companies-grid">
+      <div
+        v-for="company in filtered"
+        :key="company.id"
+        class="card-interactive"
+        @click="openDialog(company)"
+      >
+        <div class="company-card-header">
+          <div class="company-card-info">
+            <img v-if="company.logo" :src="company.logo" :alt="company.name" class="company-logo" />
+            <div v-else class="company-logo-fallback">{{ company.name.slice(0, 2).toUpperCase() }}</div>
+            <div>
+              <p class="company-name">{{ company.name }}</p>
+              <a v-if="company.website" :href="company.website" target="_blank" class="company-link" @click.stop>
+                <ExternalLink class="h-3 w-3" />
+                {{ $t('companies.website') }}
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="company-meta">
+          <div v-if="company.trustScore" class="company-rating">
+            <Star class="h-3.5 w-3.5 rating-star" />
+            {{ company.trustScore.toFixed(1) }}
+          </div>
+          <span v-if="company.created_at">
+            {{ $t('companies.createdAt') }}: {{ company.created_at?.slice(0, 10) }}
+          </span>
+        </div>
       </div>
     </div>
 
-    <!-- Error Alert -->
-    <Alert v-if="isError" variant="destructive">
-      <AlertTitle>{{ t('overview.error') }}</AlertTitle>
-      <AlertDescription class="flex justify-between items-center">
-        <span>{{ t('overview.error') }}</span>
-        <Button variant="outline" size="sm" @click="() => refetch()">{{ t('overview.retry') }}</Button>
-      </AlertDescription>
-    </Alert>
-
-    <!-- Grid Layout -->
-    <div v-if="isLoading" class="gap-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <Card v-for="i in 8" :key="i" class="flex flex-col h-[200px]">
-        <CardHeader class="flex-row items-center gap-4">
-          <Skeleton class="rounded-full w-12 h-12" />
-          <div class="flex-1 space-y-2">
-            <Skeleton class="w-full h-4" />
-            <Skeleton class="w-2/3 h-3" />
+    <!-- Detail dialog -->
+    <div v-if="dialogOpen && selectedCompany" class="overlay" @click.self="dialogOpen = false">
+      <div class="dialog-md">
+        <div class="dialog-header">
+          <div class="dialog-header-info">
+            <img v-if="selectedCompany.logo" :src="selectedCompany.logo" :alt="selectedCompany.name" class="dialog-logo" />
+            <h2 class="dialog-company-title">{{ selectedCompany.name }}</h2>
           </div>
-        </CardHeader>
-        <CardContent class="mt-auto">
-          <Skeleton class="w-1/2 h-8" />
-        </CardContent>
-      </Card>
-    </div>
-
-    <div v-else-if="companiesData?.data.length === 0" class="py-10 text-muted-foreground text-center">
-      {{ t('companies.noItems') }}
-    </div>
-
-    <div v-else class="gap-6 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <Card v-for="company in companiesData?.data" :key="company.id"
-        class="group flex flex-col hover:border-brand-neon transition-colors duration-200">
-        <CardHeader class="flex-row items-center gap-4">
-          <Avatar class="bg-white border w-12 h-12 text-zinc-800">
-            <AvatarImage :src="company.logo_url || ''" :alt="company.name" />
-            <AvatarFallback class="font-bold">{{ company.name.substring(0, 2).toUpperCase() }}</AvatarFallback>
-          </Avatar>
-          <div class="flex-1 min-w-0">
-            <CardTitle class="text-base truncate" :title="company.name">{{ company.name }}</CardTitle>
-            <CardDescription class="truncate" v-if="company.industry">{{ company.industry }}</CardDescription>
+          <button class="btn-icon" @click="dialogOpen = false">✕</button>
+        </div>
+        <p v-if="selectedCompany.description" class="dialog-description">{{ selectedCompany.description }}</p>
+        <dl class="dialog-details">
+          <div>
+            <dt class="detail-label">{{ $t('companies.trustScore') }}</dt>
+            <dd class="detail-value">{{ selectedCompany.trustScore ?? '-' }}</dd>
           </div>
-        </CardHeader>
-        <CardContent class="flex-1 space-y-2 text-muted-foreground text-sm">
-        </CardContent>
-        <CardFooter class="pt-2">
-          <a v-if="company.website" :href="company.website" target="_blank" rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 font-medium hover:text-brand-neon text-sm hover:underline">
-            <LinkIcon class="w-3 h-3" /> {{ t('companies.website') }}
-          </a>
-          <span v-else class="text-muted-foreground text-sm italic">{{ t('users.details.noData') }}</span>
-        </CardFooter>
-      </Card>
+          <div>
+            <dt class="detail-label">{{ $t('companies.ratings') }}</dt>
+            <dd class="detail-value">{{ selectedCompany.totalRatings ?? 0 }}</dd>
+          </div>
+        </dl>
+      </div>
     </div>
+
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useQuery } from '@tanstack/vue-query'
-import { Search, Plus, Link as LinkIcon } from 'lucide-vue-next'
-import { useDebounceFn } from '@vueuse/core'
+<style scoped>
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 
-import { companiesService } from '@/services/companies.service'
+.page-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Skeleton } from '@/components/ui/skeleton'
+.page-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
-const { t } = useI18n()
+.companies-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
 
-const filters = ref({
-  search: ''
-})
+@media (min-width: 640px) {
+  .companies-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
-const { data: companiesData, isLoading, isError, refetch } = useQuery({
-  queryKey: ['companies', filters],
-  queryFn: () => companiesService.getCompanies({
-    search: filters.value.search
-  }),
-  staleTime: 5 * 60 * 1000
-})
+@media (min-width: 1280px) {
+  .companies-grid { grid-template-columns: repeat(3, 1fr); }
+}
 
-const handleSearch = useDebounceFn(() => {
-  refetch()
-}, 300)
-</script>
+.company-skeleton {
+  height: 10rem;
+  border-radius: var(--r-card);
+}
+
+.company-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.company-card-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.company-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: var(--text-xs);
+  color: var(--c-text-muted);
+}
+
+.company-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.rating-star { color: var(--color-amber-400); }
+
+/* ── Dialog ── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.dialog-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dialog-logo {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--r-sm);
+  object-fit: contain;
+}
+
+.dialog-company-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--c-text-base);
+}
+
+.dialog-description {
+  margin-bottom: 1rem;
+  font-size: var(--text-sm);
+  color: var(--c-text-secondary);
+}
+
+.dialog-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  font-size: var(--text-sm);
+}
+
+.detail-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--c-text-subtle);
+}
+
+.detail-value {
+  color: var(--c-text-secondary);
+  margin: 0;
+}
+</style>

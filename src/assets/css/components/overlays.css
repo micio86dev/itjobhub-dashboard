@@ -1,0 +1,114 @@
+/* ============================================================
+   Overlays — backdrop, dialogs, dropdowns
+   ============================================================ */
+
+@layer components {
+  /* ── Full-screen backdrop ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--c-backdrop);
+    padding: var(--sp-4);
+  }
+
+  /* ── Dialog box ── */
+  .dialog {
+    width: 100%;
+    max-width: 24rem;
+    border-radius: var(--r-dialog);
+    background-color: var(--c-surface);
+    padding: var(--sp-6);
+    box-shadow: var(--shadow-dialog);
+  }
+
+  .dialog-md {
+    width: 100%;
+    max-width: 32rem;
+    border-radius: var(--r-dialog);
+    background-color: var(--c-surface);
+    padding: var(--sp-6);
+    box-shadow: var(--shadow-dialog);
+  }
+
+  .dialog-title {
+    margin-bottom: var(--sp-2);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--c-text-base);
+  }
+
+  .dialog-body {
+    margin-bottom: var(--sp-6);
+    font-size: var(--text-sm);
+    color: var(--c-text-muted);
+  }
+
+  /* ── Dropdown menu container ── */
+  .dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.25rem);
+    z-index: 50;
+    min-width: 9rem;
+    border-radius: var(--r-base);
+    border: 1px solid var(--c-border);
+    background-color: var(--c-surface);
+    padding-block: var(--sp-1);
+    box-shadow: var(--shadow-dropdown);
+  }
+
+  /* ── Dropdown item ── */
+  .dropdown-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-1\.5) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-text-secondary);
+    transition: var(--transition-colors);
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-align: left;
+
+    &:hover {
+      background-color: var(--c-surface-muted);
+    }
+
+    &.is-active {
+      font-weight: 600;
+      color: var(--c-primary-text);
+    }
+  }
+
+  /* ── Danger dropdown item (logout) ── */
+  .dropdown-item-danger {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    font-size: var(--text-sm);
+    color: var(--c-danger);
+    transition: var(--transition-colors);
+    cursor: pointer;
+    background: none;
+    border: none;
+    text-align: left;
+
+    &:hover {
+      background-color: var(--c-danger-surface);
+    }
+  }
+
+  /* ── Dropdown divider ── */
+  .dropdown-divider {
+    margin-block: var(--sp-1);
+    border-top: 1px solid var(--c-border-muted);
+  }
+}

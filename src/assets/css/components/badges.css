@@ -1,0 +1,54 @@
+/* ============================================================
+   Badges & Pills
+   ============================================================ */
+
+@layer components {
+  /* ── Count badge (zinc, secondary) ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--r-pill);
+    background-color: var(--c-surface-raised);
+    padding: var(--sp-0\.5) var(--sp-2\.5);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--c-text-secondary);
+    line-height: 1;
+  }
+
+  /* ── Primary badge (green, e.g. "Admin") ── */
+  .badge-primary {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--r-sm);
+    background-color: var(--c-primary-subtle);
+    padding: var(--sp-0\.5) var(--sp-1\.5);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--c-primary-text);
+    line-height: 1;
+  }
+
+  /* ── Filter pill (map filters, toggle buttons) ── */
+  .pill-filter {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--r-pill);
+    border: 1px solid var(--c-border);
+    padding: var(--sp-1) var(--sp-3);
+    font-size: var(--text-xs);
+    color: var(--c-text-secondary);
+    cursor: pointer;
+    transition: var(--transition-colors);
+
+    &:hover {
+      border-color: color-mix(in oklch, var(--c-primary) 50%, transparent);
+    }
+
+    &.is-active {
+      border-color: var(--c-primary);
+      background-color: var(--c-primary);
+      color: var(--c-text-inverted);
+    }
+  }
+}

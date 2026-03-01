@@ -1,0 +1,404 @@
+/* ──────────────────────────────────────────────────────────────
+   MESSAGES
+   ──────────────────────────────────────────────────────────────
+   Stili per il sistema messaggi della dashboard.
+   Contiene layout messaggi, dettagli contatti, form reply e thread.
+*/
+
+/* Layout principale: messaggi + dettagli contatto fianco */
+.content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: var(--sp-6);
+  min-height: 600px;
+}
+
+/* Responsive: single column su schermi piccoli */
+@media (max-width: 1280px) {
+  .content-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-detail-panel {
+    border-top: 1px solid var(--c-border);
+    padding-top: var(--sp-6);
+  }
+}
+
+/* Sezione lista contatti */
+.contacts-list-section {
+  @apply flex flex-col;
+  gap: var(--sp-4);
+}
+
+/* Box errore messaggi */
+.error-box {
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--c-danger-border, var(--c-border));
+  background-color: var(--c-danger-surface, var(--c-surface-muted));
+  color: var(--c-danger-text, var(--c-text-base));
+  border-radius: var(--r-base);
+  font-size: var(--text-sm);
+}
+
+/* Controlli paginazione */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  background-color: var(--c-surface-muted);
+  border-radius: var(--r-base);
+}
+
+/* Button paginazione */
+.btn-pagination {
+  padding: var(--sp-2) var(--sp-4);
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: var(--transition-colors);
+}
+
+.btn-pagination:hover:not(:disabled) {
+  background-color: var(--c-surface-muted);
+  border-color: var(--c-text-subtle);
+}
+
+.btn-pagination:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Testo informazione paginazione */
+.pagination-info {
+  font-size: var(--text-sm);
+  color: var(--c-text-muted);
+}
+
+/* Pannello dettagli contatto laterale */
+.contact-detail-panel {
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-base);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header del pannello dettagli */
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-bottom: 1px solid var(--c-border);
+  background-color: var(--c-surface-muted);
+}
+
+/* Bottone chiudi pannello */
+.btn-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-muted);
+  transition: color var(--transition-colors);
+}
+
+.btn-close:hover {
+  color: var(--c-text-base);
+}
+
+/* Titolo nel pannello dettagli */
+.detail-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Contenuto scrollabile del pannello */
+.detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+/* Box informazioni mittente */
+.sender-info {
+  background-color: var(--c-surface-muted);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+  font-size: var(--text-sm);
+}
+
+.sender-info p {
+  margin: var(--sp-2) 0;
+}
+
+.sender-info strong {
+  color: var(--c-text-secondary);
+}
+
+/* Badge stato messaggi */
+.badge-status {
+  display: inline-block;
+  background-color: var(--c-chart-secondary);
+  color: var(--c-surface);
+  padding: 0.125rem var(--sp-2);
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Box messaggio principale */
+.message-box {
+  background-color: var(--c-surface-muted);
+  border-left: 3px solid var(--c-chart-secondary);
+  padding: var(--sp-3);
+  border-radius: var(--r-sm);
+}
+
+/* Label messaggio */
+.message-label {
+  margin: 0 0 var(--sp-2) 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--c-text-secondary);
+}
+
+/* Contenuto messaggio */
+.message-content {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--c-text-base);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* Thread risposte */
+.replies-thread {
+  border-top: 1px solid var(--c-border);
+  padding-top: var(--sp-4);
+}
+
+/* Titolo risposte */
+.replies-title {
+  margin: 0 0 var(--sp-3) 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--c-text-secondary);
+}
+
+/* Singola risposta */
+.reply-item {
+  background-color: var(--c-surface-muted);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+
+/* Header della risposta (autore, data, stato) */
+.reply-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-2);
+  font-size: 0.75rem;
+}
+
+/* Mittente della risposta */
+.reply-sender {
+  display: flex;
+  align-items: center;
+}
+
+/* Nome admin che ha risposto */
+.reply-admin-name {
+  font-weight: 600;
+  color: var(--c-text-base);
+  margin-right: var(--sp-2);
+}
+
+/* Status badge risposte (read/unread) */
+.reply-status {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Badge stato letto */
+.badge-read {
+  background-color: var(--c-primary-surface);
+  color: var(--c-primary-text);
+  padding: 0.125rem var(--sp-1.5);
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+/* Badge stato non letto */
+.badge-unread {
+  background-color: var(--c-danger-surface);
+  color: var(--c-danger-text);
+  padding: 0.125rem var(--sp-1.5);
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+/* Data della risposta */
+.reply-date {
+  color: var(--c-text-muted);
+  font-size: 0.75rem;
+  margin: 0 0 var(--sp-2) 0;
+}
+
+/* Contenuto della risposta */
+.reply-content {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--c-text-base);
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+/* Sezione form risposta */
+.reply-section {
+  border-top: 1px solid var(--c-border);
+  padding-top: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+
+/* Bottone risposta */
+.btn-reply {
+  width: 100%;
+  padding: var(--sp-3);
+  background-color: var(--c-chart-secondary);
+  color: var(--c-text-inverted);
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: background-color var(--transition-colors);
+}
+
+.btn-reply:hover {
+  filter: brightness(0.9);
+}
+
+/* Form per inviare risposta */
+.reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+/* Textarea per scrivere risposta */
+.reply-textarea {
+  width: 100%;
+  padding: var(--sp-3);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  resize: none;
+}
+
+.reply-textarea:focus {
+  outline: none;
+  border-color: var(--c-chart-secondary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-chart-secondary) 10%, transparent);
+}
+
+/* Azioni form (invia, cancella) */
+.form-actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+/* Button invia */
+.btn-send,
+.btn-cancel {
+  flex: 1;
+  padding: var(--sp-2);
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition: all var(--transition-colors);
+}
+
+.btn-send {
+  background-color: var(--c-primary);
+  color: var(--c-text-inverted);
+}
+
+.btn-send:hover:not(:disabled) {
+  background-color: var(--c-primary-hover);
+}
+
+.btn-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button cancella */
+.btn-cancel {
+  background-color: var(--c-border);
+  color: var(--c-text-secondary);
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background-color: var(--c-border-strong);
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Header risposte con azioni */
+.replies-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sp-3);
+}
+
+/* Button mark as read */
+.btn-mark-read {
+  padding: var(--sp-1.5) var(--sp-3);
+  background-color: var(--c-primary);
+  color: var(--c-text-inverted);
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: background-color var(--transition-colors);
+}
+
+.btn-mark-read:hover {
+  background-color: var(--c-primary-hover);
+}
+
+.btn-mark-read:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

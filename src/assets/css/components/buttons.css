@@ -1,0 +1,150 @@
+/* ============================================================
+   Buttons — self-contained variants (no CSS Modules needed)
+   Usage: <button class="btn-primary"> or <button class="btn-icon">
+   ============================================================ */
+
+@layer components {
+  /* ── Shared base (internal mixin via CSS nesting) ── */
+  .btn-primary,
+  .btn-outline,
+  .btn-ghost,
+  .btn-ghost-danger,
+  .btn-danger,
+  .btn-period {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-2);
+    border-radius: var(--r-base);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: var(--transition-colors);
+
+    &:focus-visible {
+      outline: none;
+    }
+    &:disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+
+  /* ── Primary (green filled) ── */
+  .btn-primary {
+    background-color: var(--c-primary);
+    color: var(--c-text-inverted);
+    padding: var(--sp-2\.5) var(--sp-4);
+
+    &:hover {
+      background-color: var(--c-primary-hover);
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px var(--c-surface), 0 0 0 4px var(--c-primary-focus-ring);
+    }
+  }
+
+  /* ── Outline (bordered) ── */
+  .btn-outline {
+    border: 1px solid var(--c-border);
+    color: var(--c-text-secondary);
+    padding: var(--sp-2) var(--sp-4);
+    background-color: transparent;
+
+    &:hover {
+      background-color: var(--c-surface-muted);
+    }
+  }
+
+  /* ── Ghost (transparent, hover bg) ── */
+  .btn-ghost {
+    color: var(--c-text-muted);
+    padding: var(--sp-1\.5) var(--sp-2\.5);
+    background-color: transparent;
+    font-weight: 500;
+
+    &:hover {
+      background-color: var(--c-surface-raised);
+      color: var(--c-text-base);
+    }
+  }
+
+  /* ── Ghost danger (red hover) ── */
+  .btn-ghost-danger {
+    color: var(--c-text-muted);
+    padding: var(--sp-2) var(--sp-3);
+    background-color: transparent;
+    font-weight: 500;
+
+    &:hover {
+      background-color: var(--c-danger-surface);
+      color: var(--c-danger-text);
+    }
+  }
+
+  /* ── Danger (red filled) ── */
+  .btn-danger {
+    background-color: var(--c-danger);
+    color: var(--c-text-inverted);
+    padding: var(--sp-2) var(--sp-4);
+
+    &:hover {
+      background-color: var(--c-danger-hover);
+    }
+  }
+
+  /* ── Icon button (square, icon-only) ── */
+  .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--r-sm);
+    color: var(--c-text-subtle);
+    background-color: transparent;
+    transition: var(--transition-colors);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--c-surface-raised);
+      color: var(--c-text-base);
+    }
+  }
+
+  /* ── Period selector (analytics) ── */
+  .btn-period {
+    border: 1px solid var(--c-border);
+    color: var(--c-text-secondary);
+    padding: var(--sp-1\.5) var(--sp-3);
+    background-color: transparent;
+    font-weight: 500;
+
+    &:hover {
+      background-color: var(--c-surface-muted);
+    }
+
+    &.is-active {
+      background-color: var(--c-primary);
+      border-color: var(--c-primary);
+      color: var(--c-text-inverted);
+      font-weight: 600;
+    }
+  }
+
+  /* ── Row action (table) ── */
+  .btn-row-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-sm);
+    padding: var(--sp-1);
+    color: var(--c-text-subtle);
+    transition: var(--transition-colors);
+    cursor: pointer;
+
+    &.is-primary:hover { color: var(--c-primary-text); }
+    &.is-danger:hover  { color: var(--c-danger); }
+  }
+}

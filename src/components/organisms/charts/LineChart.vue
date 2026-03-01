@@ -1,92 +1,92 @@
-<template>
-  <Card class="flex flex-col h-full" data-testid="line-chart">
-    <CardHeader class="pb-2">
-      <CardTitle class="font-semibold text-lg">{{ title }}</CardTitle>
-    </CardHeader>
-    <CardContent class="relative flex-1 min-h-[300px]">
-      <div v-if="loading" class="absolute inset-x-6 inset-y-0 flex items-end gap-2 pt-2 pb-6">
-        <Skeleton v-for="i in 10" :key="i" class="rounded-sm w-full h-full" :style="{ height: `${Math.max(20, Math.random() * 100)}%` }" />
-      </div>
-      <v-chart 
-        v-else 
-        class="absolute inset-0 p-6 pt-0 w-full h-full" 
-        :option="chartOption" 
-        :theme="isDark ? 'dark' : 'light'" 
-        autoresize 
-      />
-    </CardContent>
-  </Card>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart as ELineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import '@/plugins/echarts'
-import { useTheme } from '@/composables/useTheme'
+import { getChartColors, addAlpha } from '@/utils/chartColors'
 
-const props = defineProps<{
-  title: string
-  series: Array<{ name: string; data: number[] }>
-  xLabels: string[]
-  loading?: boolean
-}>()
+use([CanvasRenderer, ELineChart, GridComponent, TooltipComponent, LegendComponent])
 
-const { theme } = useTheme()
-const isDark = computed(() => {
-  if (theme.value === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-  }
-  return theme.value === 'dark'
-})
+interface Series {
+  name: string
+  data: number[]
+}
 
-const chartOption = computed(() => {
+const props = withDefaults(
+  defineProps<{
+    title: string
+    series: Series[]
+    xLabels: string[]
+    loading?: boolean
+  }>(),
+  { loading: false },
+)
+
+const option = computed(() => {
+  const colors = getChartColors()
+
   return {
     backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis'
-    },
-    legend: {
-      show: props.series.length > 1,
-      bottom: 0
-    },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: props.series.length > 1 ? '15%' : '3%',
-      top: '5%',
-      containLabel: true
-    },
+    textStyle: { color: colors.text },
+    tooltip: { trigger: 'axis' },
+    legend:
+      props.series.length > 1
+        ? { bottom: 0, textStyle: { color: colors.text } }
+        : undefined,
+    grid: { left: 40, right: 16, top: 16, bottom: props.series.length > 1 ? 40 : 16 },
     xAxis: {
       type: 'category',
-      boundaryGap: false,
       data: props.xLabels,
-      axisLine: { lineStyle: { color: isDark.value ? '#52525b' : '#e4e4e7' } }
+      axisLine: { lineStyle: { color: colors.axis } },
+      axisTick: { show: false },
+      axisLabel: { color: colors.textMuted, fontSize: 11 },
     },
     yAxis: {
       type: 'value',
-      splitLine: { lineStyle: { color: isDark.value ? '#3f3f46' : '#f4f4f5' } }
+      splitLine: { lineStyle: { color: colors.grid } },
+      axisLabel: { color: colors.textMuted, fontSize: 11 },
     },
-    series: props.series.map(s => ({
+    series: props.series.map((s, i) => ({
       name: s.name,
       type: 'line',
-      data: s.data,
+      data: Array.isArray(s.data) ? s.data : [],
       smooth: true,
-      showSymbol: false,
-      itemStyle: { color: '#22c55e' }, // brand-neon
-      areaStyle: {
-        color: {
-          type: 'linear',
-          x: 0, y: 0, x2: 0, y2: 1,
-          colorStops: [{
-            offset: 0, color: 'rgba(34, 197, 94, 0.4)'
-          }, {
-            offset: 1, color: 'rgba(34, 197, 94, 0.05)'
-          }]
-        }
-      }
-    }))
+      symbol: 'circle',
+      symbolSize: 5,
+      lineStyle: { color: i === 0 ? colors.primary : colors.secondary, width: 2 },
+      itemStyle: { color: i === 0 ? colors.primary : colors.secondary },
+      areaStyle:
+        i === 0
+          ? {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: addAlpha(colors.primary, 0.2) },
+                { offset: 1, color: addAlpha(colors.primary, 0.01) },
+              ],
+            },
+          }
+          : undefined,
+      emphasis: { disabled: true },
+    })),
   }
 })
 </script>
+
+<template>
+  <div class="chart-card">
+    <h3 class="section-heading">{{ title }}</h3>
+    <template v-if="loading">
+      <div class="h-48 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+    </template>
+    <div v-else class="h-48">
+      <VChart class="h-full w-full" :option="option" autoresize />
+    </div>
+  </div>
+</template>

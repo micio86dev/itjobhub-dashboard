@@ -1,80 +1,100 @@
-<template>
-  <Card class="flex flex-col h-full" data-testid="bar-chart">
-    <CardHeader class="pb-2">
-      <CardTitle class="font-semibold text-lg">{{ title }}</CardTitle>
-    </CardHeader>
-    <CardContent class="relative flex-1 min-h-[300px]">
-      <div v-if="loading" class="absolute inset-x-6 inset-y-0 flex items-end gap-2 pt-2 pb-6" :class="{ 'flex-col items-start gap-4': horizontal }">
-        <Skeleton v-for="i in 10" :key="i" class="rounded-sm w-full h-full" :style="horizontal ? { width: `${Math.max(20, Math.random() * 100)}%`, height: '100%' } : { height: `${Math.max(20, Math.random() * 100)}%` }" />
-      </div>
-      <v-chart 
-        v-else 
-        class="absolute inset-0 p-6 pt-0 w-full h-full" 
-        :option="chartOption" 
-        :theme="isDark ? 'dark' : 'light'" 
-        autoresize 
-      />
-    </CardContent>
-  </Card>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { BarChart as EBarChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-import '@/plugins/echarts'
-import { useTheme } from '@/composables/useTheme'
+import { getChartColors } from '@/utils/chartColors'
 
-const props = defineProps<{
-  title: string
-  data: Array<{ label: string; value: number }>
-  horizontal?: boolean
-  loading?: boolean
-}>()
+use([CanvasRenderer, EBarChart, GridComponent, TooltipComponent])
 
-const { theme } = useTheme()
-const isDark = computed(() => {
-  if (theme.value === 'system') {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+interface BarItem {
+  label: string
+  value: number
+}
+
+const props = withDefaults(
+  defineProps<{
+    title: string
+    data: BarItem[]
+    horizontal?: boolean
+    loading?: boolean
+  }>(),
+  { horizontal: false, loading: false },
+)
+
+const option = computed(() => {
+  const labels = props.data.map((d) => d.label)
+  const values = props.data.map((d) => d.value)
+  const colors = getChartColors()
+
+  if (props.horizontal) {
+    return {
+      backgroundColor: 'transparent',
+      tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+      grid: { left: 120, right: 16, top: 8, bottom: 8 },
+      xAxis: {
+        type: 'value',
+        splitLine: { lineStyle: { color: colors.grid } },
+        axisLabel: { color: colors.text, fontSize: 11 },
+      },
+      yAxis: {
+        type: 'category',
+        data: labels,
+        axisLine: { lineStyle: { color: colors.axis } },
+        axisTick: { show: false },
+        axisLabel: { color: colors.text, fontSize: 11, width: 110, overflow: 'truncate' },
+      },
+      series: [
+        {
+          type: 'bar',
+          data: Array.isArray(values) ? values : [],
+          barMaxWidth: 16,
+          itemStyle: { color: colors.primary, borderRadius: [0, 4, 4, 0] },
+          emphasis: { itemStyle: { color: colors.primaryAlt } },
+        },
+      ],
+    }
   }
-  return theme.value === 'dark'
-})
 
-const chartOption = computed(() => {
-  const xAxis = props.horizontal ? { type: 'value', splitLine: { show: false } } : { type: 'category', data: props.data.map(d => d.label) }
-  const yAxis = props.horizontal ? { type: 'category', data: props.data.map(d => d.label) } : { type: 'value', splitLine: { lineStyle: { color: isDark.value ? '#3f3f46' : '#f4f4f5' } } }
-  
   return {
     backgroundColor: 'transparent',
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' }
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: 40, right: 16, top: 8, bottom: 24 },
+    xAxis: {
+      type: 'category',
+      data: labels,
+      axisLine: { lineStyle: { color: colors.axis } },
+      axisTick: { show: false },
+      axisLabel: { color: colors.text, fontSize: 11 },
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      top: '5%',
-      containLabel: true
+    yAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: colors.grid } },
+      axisLabel: { color: colors.text, fontSize: 11 },
     },
-    xAxis,
-    yAxis,
     series: [
       {
         type: 'bar',
-        data: props.data.map(d => d.value),
-        itemStyle: {
-          color: '#22c55e',
-          borderRadius: props.horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]
-        },
-        emphasis: {
-          itemStyle: {
-            color: '#16a34a'
-          }
-        }
-      }
-    ]
+        data: Array.isArray(values) ? values : [],
+        barMaxWidth: 32,
+        itemStyle: { color: colors.primary, borderRadius: [4, 4, 0, 0] },
+        emphasis: { itemStyle: { color: colors.primaryAlt } },
+      },
+    ],
   }
 })
 </script>
+
+<template>
+  <div class="chart-card">
+    <h3 class="section-heading">{{ title }}</h3>
+    <template v-if="loading">
+      <div class="h-48 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+    </template>
+    <div v-else class="h-48">
+      <VChart class="h-full w-full" :option="option" autoresize />
+    </div>
+  </div>
+</template>

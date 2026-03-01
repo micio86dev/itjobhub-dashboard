@@ -1,29 +1,35 @@
-import { afterEach, vi } from 'vitest';
+import { config } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import it from '@/i18n/locales/it'
 
-// Polyfill matchMedia for jsdom (not available natively)
-// This is an environment polyfill, NOT a business logic mock
+// matchMedia polyfill — happy-dom does not implement matchMedia
 Object.defineProperty(window, 'matchMedia', {
-    writable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-    })),
-});
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => undefined,
+    removeListener: () => undefined,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+    dispatchEvent: () => false,
+  }),
+})
 
-// Clean up between tests
-afterEach(() => {
-    // Reset document.cookie
-    document.cookie.split(';').forEach((c) => {
-        document.cookie = c
-            .replace(/^ +/, '')
-            .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
-    });
-    // Reset document classes
-    document.documentElement.classList.remove('dark');
-});
+// ResizeObserver polyfill
+class ResizeObserverStub {
+  observe() { return undefined }
+  unobserve() { return undefined }
+  disconnect() { return undefined }
+}
+;(globalThis as unknown as Record<string, unknown>).ResizeObserver = ResizeObserverStub
+
+// Install i18n globally so all mounted components can use $t / useI18n()
+const i18n = createI18n({
+  legacy: false,
+  locale: 'it',
+  messages: { it },
+})
+
+config.global.plugins = [i18n]

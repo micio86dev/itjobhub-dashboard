@@ -1,56 +1,64 @@
-<template>
-  <Card 
-    class="hover:shadow-md transition-shadow duration-200"
-    data-testid="stat-card"
-  >
-    <CardHeader class="flex flex-row justify-between items-center space-y-0 pb-2">
-      <CardTitle class="font-medium text-muted-foreground text-sm">
-        {{ title }}
-      </CardTitle>
-      <component
-        v-if="icon"
-        :is="icon"
-        class="w-4 h-4 text-muted-foreground"
-      />
-    </CardHeader>
-    <CardContent>
-      <div v-if="loading" class="space-y-2">
-        <Skeleton class="w-[100px] h-8" />
-        <Skeleton class="w-[60px] h-4" />
-      </div>
-      <div v-else>
-        <div class="font-bold text-2xl" data-testid="stat-value">
-          {{ value }}
-        </div>
-        <p 
-          v-if="change !== undefined"
-          class="flex items-center mt-1 text-sm"
-          :class="change >= 0 ? 'text-green-500' : 'text-red-500'"
-          data-testid="stat-change"
-        >
-          <ArrowUpRight v-if="change >= 0" class="mr-1 w-3 h-3" />
-          <ArrowDownRight v-else class="mr-1 w-3 h-3" />
-          <span class="font-medium">{{ Math.abs(change) }}%</span>
-          <span class="ml-1 font-normal text-muted-foreground">dal mese scorso</span>
-        </p>
-      </div>
-    </CardContent>
-  </Card>
-</template>
-
 <script setup lang="ts">
-import type { Component } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ArrowUpRight, ArrowDownRight } from 'lucide-vue-next'
+import { computed, type Component } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { TrendingUp, TrendingDown } from 'lucide-vue-next'
 
-export interface StatCardProps {
-  title: string
-  value: string | number
-  change?: number
-  icon?: Component
-  loading?: boolean
-}
+const { t } = useI18n()
 
-defineProps<StatCardProps>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    value: string | number
+    change?: number
+    icon?: Component
+    loading?: boolean
+  }>(),
+  {
+    loading: false,
+  },
+)
+
+const changePositive = computed(() => (props.change ?? 0) >= 0)
+const changeClass = computed(() => changePositive.value ? 'trend-up' : 'trend-down')
+const changeLabel = computed(() => {
+  if (props.change === undefined) return ''
+  const sign = props.change >= 0 ? '+' : ''
+  return `${sign}${props.change.toFixed(1)}%`
+})
 </script>
+
+<template>
+  <div data-testid="stat-card" class="card stat-card">
+
+    <!-- Skeleton -->
+    <template v-if="loading">
+      <div class="skeleton stat-skeleton-title" />
+      <div class="skeleton stat-skeleton-value" />
+      <div class="skeleton stat-skeleton-change" />
+    </template>
+
+    <!-- Content -->
+    <template v-else>
+      <div class="stat-header">
+        <p class="stat-label">{{ title }}</p>
+        <component :is="icon" v-if="icon" class="h-5 w-5 stat-icon" />
+      </div>
+
+      <p data-testid="stat-value" class="stat-value">
+        {{ value.toLocaleString() }}
+      </p>
+
+      <div
+        v-if="change !== undefined"
+        data-testid="stat-change"
+        class="stat-change"
+        :class="changeClass"
+      >
+        <TrendingUp v-if="changePositive" class="h-4 w-4" />
+        <TrendingDown v-else class="h-4 w-4" />
+        <span>{{ changeLabel }} {{ t('common.vsLastMonth') }}</span>
+      </div>
+    </template>
+
+  </div>
+</template>

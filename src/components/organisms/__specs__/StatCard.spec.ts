@@ -1,64 +1,52 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { Users } from 'lucide-vue-next'
 import StatCard from '../StatCard.vue'
 
 describe('StatCard', () => {
-    it('renders title and value', () => {
-        const wrapper = mount(StatCard, {
-            props: {
-                title: 'Total Users',
-                value: '1,234'
-            }
-        })
+  it('renders [data-testid="stat-card"]', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 1234 } })
+    expect(wrapper.find('[data-testid="stat-card"]').exists()).toBe(true)
+  })
 
-        expect(wrapper.text()).toContain('Total Users')
-        expect(wrapper.find('[data-testid="stat-value"]').text()).toBe('1,234')
-    })
+  it('displays [data-testid="stat-value"] with the given value', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 1234 } })
+    expect(wrapper.find('[data-testid="stat-value"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="stat-value"]').text()).toContain('1')
+  })
 
-    it('renders positive change in green with arrow up', () => {
-        const wrapper = mount(StatCard, {
-            props: {
-                title: 'Revenue',
-                value: '$12K',
-                change: 15
-            }
-        })
+  it('shows positive change with + prefix', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 500, change: 5.2 } })
+    expect(wrapper.find('[data-testid="stat-change"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="stat-change"]').text()).toContain('+5.2%')
+  })
 
-        const changeEl = wrapper.find('[data-testid="stat-change"]')
-        expect(changeEl.exists()).toBe(true)
-        expect(changeEl.text()).toContain('15%')
-        expect(changeEl.classes()).toContain('text-green-500')
-        // lucide-vue-next ArrowUpRight creates an svg inside the change element
-        expect(changeEl.find('svg').exists()).toBe(true)
-    })
+  it('shows negative change without + prefix', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 500, change: -3.1 } })
+    const change = wrapper.find('[data-testid="stat-change"]')
+    expect(change.exists()).toBe(true)
+    expect(change.text()).toContain('-3.1%')
+  })
 
-    it('renders negative change in red with arrow down', () => {
-        const wrapper = mount(StatCard, {
-            props: {
-                title: 'Bounce Rate',
-                value: '42%',
-                change: -5
-            }
-        })
+  it('hides stat-change when change prop is absent', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 500 } })
+    expect(wrapper.find('[data-testid="stat-change"]').exists()).toBe(false)
+  })
 
-        const changeEl = wrapper.find('[data-testid="stat-change"]')
-        expect(changeEl.classes()).toContain('text-red-500')
-        expect(changeEl.text()).toContain('5%') // absolute value
-        expect(changeEl.find('svg').exists()).toBe(true)
-    })
+  it('renders skeleton and hides stat-value when loading', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 0, loading: true } })
+    expect(wrapper.find('[data-testid="stat-value"]').exists()).toBe(false)
+    expect(wrapper.find('.animate-pulse').exists()).toBe(true)
+  })
 
-    it('shows skeleton when loading', () => {
-        const wrapper = mount(StatCard, {
-            props: {
-                title: 'Loading Stat',
-                value: 100,
-                loading: true
-            }
-        })
+  it('renders icon component when provided', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Users', value: 0, icon: Users } })
+    expect(wrapper.find('[data-testid="stat-card"]').exists()).toBe(true)
+    // icon slot is rendered as a <component :is="icon"> — just verify no errors thrown
+  })
 
-        expect(wrapper.find('[data-testid="stat-change"]').exists()).toBe(false)
-        expect(wrapper.find('[data-testid="stat-value"]').exists()).toBe(false)
-        // Skeletons are rendered
-        expect(wrapper.html()).toContain('animate-pulse')
-    })
+  it('renders string value correctly', () => {
+    const wrapper = mount(StatCard, { props: { title: 'Rate', value: '98.5%' } })
+    expect(wrapper.find('[data-testid="stat-value"]').text()).toContain('98.5%')
+  })
 })

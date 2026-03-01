@@ -1,0 +1,34 @@
+/* ──────────────────────────────────────────────────────────────
+   PAGES COMMON
+   ──────────────────────────────────────────────────────────────
+   Stili layout comuni a tutte le pagine dashboard.
+   Utilizza @apply per le utility Tailwind e CSS custom per i colori.
+*/
+
+/* Layout principale della pagina */
+.page-stack {
+  @apply flex flex-col;
+  gap: var(--sp-6);
+}
+
+/* Riga header con titolo e azioni */
+.page-header-row {
+  @apply flex items-center justify-between;
+}
+
+/* Gruppo titolo con badge conteggio */
+.page-title-group {
+  @apply flex items-center;
+  gap: var(--sp-3);
+}
+
+/* Titolo principale pagina */
+.page-title {
+  @apply text-3xl font-bold m-0;
+}
+
+/* Sottotitolo pagina - timestamp, descrizione */
+.page-subtitle {
+  @apply mt-0.5 text-sm;
+  color: var(--c-text-muted);
+}

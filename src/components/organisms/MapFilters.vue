@@ -1,129 +1,162 @@
-<template>
-  <Card class="flex flex-col h-full" data-testid="map-filters">
-    <CardHeader class="pb-3 border-b">
-      <CardTitle class="flex justify-between items-center font-semibold text-lg">
-        Filtri
-        <Badge variant="secondary">{{ resultCount }} trovati</Badge>
-      </CardTitle>
-    </CardHeader>
-    <CardContent class="flex-1 space-y-6 p-4 overflow-y-auto">
-      
-      <!-- Radio Group: Model -->
-      <div class="space-y-3">
-        <h4 class="font-medium text-sm leading-none">Modalità di lavoro</h4>
-        <RadioGroup v-model="filters.remote" class="flex flex-col space-y-1">
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="all" id="r-all" />
-            <Label htmlFor="r-all" class="font-normal cursor-pointer">Tutti</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="remote" id="r-remote" />
-            <Label htmlFor="r-remote" class="font-normal text-green-600 dark:text-green-500 cursor-pointer">Remote</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="hybrid" id="r-hybrid" />
-            <Label htmlFor="r-hybrid" class="font-normal text-blue-600 dark:text-blue-500 cursor-pointer">Hybrid</Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value="onsite" id="r-onsite" />
-            <Label htmlFor="r-onsite" class="font-normal text-zinc-600 dark:text-zinc-400 cursor-pointer">On-site</Label>
-          </div>
-        </RadioGroup>
-      </div>
-
-      <!-- Select: Contract Type -->
-      <div class="space-y-3">
-        <h4 class="font-medium text-sm leading-none">Tipo di contratto</h4>
-        <Select v-model="filters.contractType">
-          <SelectTrigger>
-            <SelectValue placeholder="Seleziona tipo contratto" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutti i tipi</SelectItem>
-            <SelectItem value="FULL_TIME">Full-time</SelectItem>
-            <SelectItem value="PART_TIME">Part-time</SelectItem>
-            <SelectItem value="CONTRACT">Contract</SelectItem>
-            <SelectItem value="FREELANCE">Freelance</SelectItem>
-            <SelectItem value="INTERNSHIP">Internship</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <!-- Select: Experience Level -->
-      <div class="space-y-3">
-        <h4 class="font-medium text-sm leading-none">Esperienza</h4>
-        <Select v-model="filters.experienceLevel">
-          <SelectTrigger>
-            <SelectValue placeholder="Seleziona esperienza" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Qualsiasi livello</SelectItem>
-            <SelectItem value="JUNIOR">Junior</SelectItem>
-            <SelectItem value="MID">Mid-level</SelectItem>
-            <SelectItem value="SENIOR">Senior</SelectItem>
-            <SelectItem value="LEAD">Lead/Manager</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <!-- Select: Published Within -->
-      <div class="space-y-3">
-        <h4 class="font-medium text-sm leading-none">Data di pubblicazione</h4>
-        <Select v-model="filters.publishedWithin">
-          <SelectTrigger>
-            <SelectValue placeholder="Seleziona periodo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Sempre</SelectItem>
-            <SelectItem value="7">Ultimi 7 giorni</SelectItem>
-            <SelectItem value="30">Ultimi 30 giorni</SelectItem>
-            <SelectItem value="90">Ultimi 3 mesi</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-    </CardContent>
-    <div class="mt-auto p-4 border-t">
-      <Button variant="outline" class="w-full" @click="resetFilters">
-        <RotateCcw class="mr-2 w-4 h-4" />
-        Reset filtri
-      </Button>
-    </div>
-  </Card>
-</template>
-
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
+import { reactive, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RotateCcw } from 'lucide-vue-next'
 
+export interface MapFiltersState {
+  skills: string[]
+  remote: 'remote' | 'hybrid' | 'onsite' | null
+  company: string | null
+  contractType: string | null
+  experienceLevel: string | null
+  publishedWithin: 7 | 30 | 90 | null
+}
+
 defineProps<{
-  resultCount: number
+  jobsCount: number
+  availableSkills?: string[]
+  availableCompanies?: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:filters', filters: Record<string, unknown>): void
+  'update:filters': [filters: MapFiltersState]
 }>()
 
-const initialFilters = {
-  remote: 'all',
-  contractType: 'all',
-  experienceLevel: 'all',
-  publishedWithin: 'all'
+const { t } = useI18n()
+
+const filters = reactive<MapFiltersState>({
+  skills: [],
+  remote: null,
+  company: null,
+  contractType: null,
+  experienceLevel: null,
+  publishedWithin: null,
+})
+
+const workModes = computed(() => [
+  { value: null, label: t('common.all') },
+  { value: 'remote', label: t('jobs.workMode.remote') },
+  { value: 'hybrid', label: t('jobs.workMode.hybrid') },
+  { value: 'onsite', label: t('jobs.workMode.onsite') },
+])
+
+const publishedOptions = computed(() => [
+  { value: null, label: t('common.all') },
+  { value: 7, label: t('map.days7') },
+  { value: 30, label: t('map.days30') },
+  { value: 90, label: t('map.days90') },
+])
+
+function resetFilters() {
+  filters.skills = []
+  filters.remote = null
+  filters.company = null
+  filters.contractType = null
+  filters.experienceLevel = null
+  filters.publishedWithin = null
 }
 
-const filters = reactive({ ...initialFilters })
-
-watch(filters, (newVal) => {
-  emit('update:filters', newVal)
+watch(filters, () => {
+  emit('update:filters', { ...filters })
 }, { deep: true })
-
-const resetFilters = () => {
-  Object.assign(filters, initialFilters)
-}
 </script>
+
+<template>
+  <div class="filters-panel">
+
+    <!-- Jobs count -->
+    <div class="jobs-count-box">
+      <p class="jobs-count-value">
+        {{ jobsCount.toLocaleString() }}
+        <span class="jobs-count-label">{{ $t('map.jobsFound') }}</span>
+      </p>
+    </div>
+
+    <!-- Work mode filter -->
+    <div class="filter-group">
+      <label class="form-label-xs">{{ $t('map.filterWorkMode') }}</label>
+      <div class="pill-group">
+        <button
+          v-for="mode in workModes"
+          :key="String(mode.value)"
+          class="pill-filter"
+          :class="{ 'is-active': filters.remote === mode.value }"
+          @click="filters.remote = mode.value as MapFiltersState['remote']"
+        >
+          {{ mode.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Published within -->
+    <div class="filter-group">
+      <label class="form-label-xs">{{ $t('map.filterPublished') }}</label>
+      <select v-model="filters.publishedWithin" class="form-select">
+        <option v-for="opt in publishedOptions" :key="String(opt.value)" :value="opt.value">
+          {{ opt.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Company filter -->
+    <div v-if="availableCompanies && availableCompanies.length > 0" class="filter-group">
+      <label class="form-label-xs">{{ $t('map.filterCompany') }}</label>
+      <select v-model="filters.company" class="form-select">
+        <option :value="null">{{ $t('common.all') }}</option>
+        <option v-for="c in availableCompanies" :key="c" :value="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <!-- Reset -->
+    <button class="btn-outline reset-btn" @click="resetFilters">
+      <RotateCcw class="h-4 w-4" />
+      {{ $t('map.resetFilters') }}
+    </button>
+
+  </div>
+</template>
+
+<style scoped>
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+
+.jobs-count-box {
+  border-radius: var(--r-base);
+  background-color: var(--c-primary-surface);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.jobs-count-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--c-primary-text);
+}
+
+.jobs-count-label {
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1\.5);
+}
+
+.reset-btn {
+  margin-top: auto;
+  width: 100%;
+  justify-content: center;
+}
+</style>
