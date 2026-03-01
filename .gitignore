@@ -11,6 +11,7 @@ dist/
 
 # Cache
 *.tsbuildinfo
+.eslintcache
 .vite/
 .rollup.cache/
 
