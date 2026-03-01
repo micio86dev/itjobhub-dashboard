@@ -7,14 +7,14 @@ import { http } from '@/api/client'
  */
 const getUnreadMessagesCount = async (): Promise<number> => {
   try {
-    const response = await http.get<{ count: number }>('/messages/admin/unread-count')
-    const data: any = response.data
+    const response = await http.get<{ count: number } | { data: { count: number } }>('/messages/admin/unread-count')
+    const data = response.data
 
     // Handle double-wrapped response: response.data might be { success, data: { count } }
-    const count = data?.data?.count ?? data?.count ?? 0
+    const nested = data as { data?: { count?: number }; count?: number }
+    const count = nested?.data?.count ?? nested?.count ?? 0
     return count
-  } catch (error) {
-    console.error('Error fetching unread count:', error)
+  } catch {
     return 0
   }
 }

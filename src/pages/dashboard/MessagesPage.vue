@@ -156,8 +156,8 @@ const handleSendReply = async () => {
 
     // Refetch the unread count
     await refetchUnreadCount()
-  } catch (error) {
-    console.error('Error sending reply:', error)
+  } catch {
+    // reply failed silently
   } finally {
     isReplying.value = false
   }
@@ -332,7 +332,7 @@ const handleDeleteReply = async () => {
           <div v-if="selectedContact.replies.length > 0" class="replies-thread">
             <div class="replies-header">
               <h3 class="replies-title">{{ $t('messages.replies') }} ({{ selectedContact.replies.length
-              }})
+                }})
               </h3>
             </div>
             <div class="reply-item" v-for="reply in selectedContact.replies" :key="reply.id">
@@ -376,7 +376,7 @@ const handleDeleteReply = async () => {
                   </div>
                   <span class="reply-status">
                     <span v-if="reply.read_by_sender" class="badge-read">{{ $t('messages.read')
-                    }}</span>
+                      }}</span>
                     <span v-else class="badge-unread">{{ $t('messages.unread') }}</span>
                   </span>
                 </div>
