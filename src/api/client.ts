@@ -1,8 +1,6 @@
 type QueryValue = string | number | boolean | string[] | null | undefined
-// Broad type for internal use: accepts any typed param interface without
-// requiring an explicit index signature on the caller's side.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyParams = Record<string, any>
+
+type AnyParams = Record<string, unknown>
 
 const BASE_URL = (import.meta.env.PUBLIC_API_URL as string | undefined) ?? ''
 
