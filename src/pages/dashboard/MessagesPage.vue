@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuery } from '@tanstack/vue-query'
 import { formatDistanceToNow, type Locale } from 'date-fns'
@@ -11,15 +11,13 @@ import { fr } from 'date-fns/locale/fr'
 import type { ColumnDef } from '@tanstack/vue-table'
 import DataTable from '@/components/organisms/DataTable.vue'
 import ConfirmDialog from '@/components/organisms/ConfirmDialog.vue'
-import { getContacts, replyToContact, updateReply, deleteReply, type Contact, type ContactReply } from '@/api/messages'
+import { getContacts, replyToContact, updateReply, deleteReply, deleteContact, type Contact, type ContactReply } from '@/api/messages'
 import { useUnreadMessages } from '@/composables/useUnreadMessages'
 import '@/assets/css/components/messages.css'
 
 const { t, locale } = useI18n()
 const { refetch: refetchUnreadCount } = useUnreadMessages()
 
-const page = ref(1)
-const limit = ref(10)
 const selectedContact = ref<Contact | null>(null)
 const replyMessage = ref('')
 const isReplying = ref(false)
@@ -29,6 +27,8 @@ const editingReplyText = ref('')
 const isEditingSaving = ref(false)
 const isDeletingReplyId = ref<string | null>(null)
 const confirmDeleteReplyId = ref<string | null>(null)
+const confirmDeleteContactId = ref<string | null>(null)
+const isDeletingContact = ref(false)
 
 // Get locale for date-fns
 const getDateLocale = (): Locale => {
@@ -36,14 +36,9 @@ const getDateLocale = (): Locale => {
   return localeMap[locale.value] || en
 }
 
-const queryParams = computed(() => ({
-  page: page.value,
-  limit: limit.value,
-}))
-
 const contactsQ = useQuery({
-  queryKey: ['contacts', page, limit],
-  queryFn: () => getContacts(queryParams.value),
+  queryKey: ['contacts'],
+  queryFn: () => getContacts({ limit: 200 }),
   staleTime: 0,
   gcTime: 0,
   refetchOnMount: true,
@@ -53,17 +48,10 @@ const contactsQ = useQuery({
       data?: Contact[] | { data?: Contact[]; pagination?: { page: number; limit: number; total: number; pages: number } }
       pagination?: { page: number; limit: number; total: number; pages: number }
     }
-
     const data = Array.isArray(payload.data)
       ? payload.data
       : (payload.data?.data ?? [])
-
-    const nestedPagination = !Array.isArray(payload.data)
-      ? payload.data?.pagination
-      : undefined
-    const pagination = payload.pagination ?? nestedPagination
-
-    return { data, pagination }
+    return { data }
   },
 })
 
@@ -217,6 +205,34 @@ const handleSaveEditReply = async () => {
 }
 
 /**
+ * Delete a contact (message thread)
+ */
+const handleDeleteContact = async () => {
+  if (!confirmDeleteContactId.value) return
+
+  const contactId = confirmDeleteContactId.value
+  isDeletingContact.value = true
+  try {
+    await deleteContact(contactId)
+
+    // Close detail panel if this contact was selected
+    if (selectedContact.value?.id === contactId) {
+      selectedContact.value = null
+      replyMessage.value = ''
+      showReplyForm.value = false
+    }
+
+    // Refetch list
+    await contactsQ.refetch()
+  } catch {
+    // Error handled silently
+  } finally {
+    isDeletingContact.value = false
+    confirmDeleteContactId.value = null
+  }
+}
+
+/**
  * Delete a reply
  */
 const handleDeleteReply = async () => {
@@ -252,7 +268,7 @@ const handleDeleteReply = async () => {
       <div class="page-title-group">
         <h1 class="page-title">{{ $t('messages.title') }}</h1>
         <span v-if="contactsQ.data.value" class="badge">
-          {{ contactsQ.data.value.pagination?.total ?? 0 }}
+          {{ contactsQ.data.value.data.length }}
         </span>
       </div>
     </div>
@@ -267,25 +283,22 @@ const handleDeleteReply = async () => {
 
         <DataTable :columns="columns" :data="contactsQ.data.value?.data ?? []" :loading="contactsQ.isPending.value"
           :searchable="false" @row-click="(row: Contact) => handleSelectContact(row)" />
-
-        <!-- Pagination -->
-        <div v-if="contactsQ.data.value?.pagination" class="pagination-controls">
-          <button :disabled="page <= 1" @click="page--" class="btn-pagination">
-            {{ $t('table.prev') }}
-          </button>
-          <span class="pagination-info">
-            {{ $t('table.page') }} {{ page }} / {{ contactsQ.data.value?.pagination?.pages ?? 1 }}
-          </span>
-          <button :disabled="page >= (contactsQ.data.value?.pagination?.pages ?? 1)" @click="page++"
-            class="btn-pagination">
-            {{ $t('table.next') }}
-          </button>
-        </div>
       </div>
 
       <!-- Contact Detail Panel -->
       <div v-if="selectedContact" class="contact-detail-panel">
         <div class="detail-header">
+          <button
+            @click="confirmDeleteContactId = selectedContact.id"
+            :disabled="isDeletingContact"
+            class="btn-icon-action btn-danger"
+            :title="$t('messages.deleteMessage')"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
           <button @click="handleCloseDetail" class="btn-close">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -415,9 +428,13 @@ const handleDeleteReply = async () => {
     </div>
   </div>
 
-  <!-- Confirm Delete Dialog -->
+  <!-- Confirm Delete Reply Dialog -->
   <ConfirmDialog v-model:isOpen="confirmDeleteReplyId" :title="t('messages.deleteReply')"
     :message="t('messages.confirmDeleteReply')" @confirm="handleDeleteReply" />
+
+  <!-- Confirm Delete Message Dialog -->
+  <ConfirmDialog v-model:isOpen="confirmDeleteContactId" :title="t('messages.deleteMessage')"
+    :message="t('messages.confirmDeleteMessage')" @confirm="handleDeleteContact" />
 </template>
 
 <style scoped>

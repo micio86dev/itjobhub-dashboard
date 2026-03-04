@@ -213,6 +213,8 @@ export default {
     markAsRead: 'Mark as read',
     deleteReply: 'Delete Reply',
     confirmDeleteReply: 'Are you sure you want to delete this reply?',
+    deleteMessage: 'Delete Message',
+    confirmDeleteMessage: 'Are you sure you want to delete this message and all its replies?',
   },
   contact: {
     type: {

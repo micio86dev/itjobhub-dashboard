@@ -226,6 +226,8 @@ export default {
     markAsRead: 'Marca come letto',
     deleteReply: 'Elimina Risposta',
     confirmDeleteReply: 'Sei sicuro di voler eliminare questa risposta?',
+    deleteMessage: 'Elimina Messaggio',
+    confirmDeleteMessage: 'Sei sicuro di voler eliminare questo messaggio e tutte le relative risposte?',
   },
   contact: {
     type: {
